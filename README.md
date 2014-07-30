@@ -13,6 +13,8 @@ catch
 end
 ```
 
+You probably need to add `:httpoison` to your applications list too.
+
 ## Roadmap
 
 In the future it will be able report optional information that Bugsnag accepts
