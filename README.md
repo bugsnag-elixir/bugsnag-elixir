@@ -1,16 +1,16 @@
 Bugsnag Elixir
 ==============
 
-Capture exceptions and send them to the Bugsnag API! All it needs is your API
-key (see example configuration in config/config.exs) and then reporting errors
-is as simple as:
+Capture exceptions and send them to the [Bugsnag](http://bugsnag.com) API! All
+it needs is your API key (see example configuration in config/config.exs) and
+then reporting errors is as simple as:
 
 ```elixir
-    try do
-      :foo = :bar
-    catch
-      _kind, error -> Bugsnag.crash(error)
-    end
+try do
+  :foo = :bar
+catch
+  _kind, error -> Bugsnag.crash(error)
+end
 ```
 
 ## Roadmap
