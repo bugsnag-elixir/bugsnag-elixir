@@ -48,10 +48,13 @@ defmodule Bugsnag do
 
   defp format_stacktrace do
     System.stacktrace
-    |> Enum.filter_map fn
-      ({ _, _, _, [] }) -> false
-      (_) -> true
-    end, fn
+    |> Enum.map fn
+      ({ module, function, arity, [] }) ->
+        %{
+          file: "unknown",
+          lineNumber: 0,
+          method: "#{ module }.#{ function }/#{ arity }"
+        }
       ({ module, function, arity, [ file: file, line: line_number ] }) ->
         %{
           file: file |> List.to_string,
