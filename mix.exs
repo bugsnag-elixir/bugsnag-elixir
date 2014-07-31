@@ -24,7 +24,7 @@ defmodule Bugsnag.Mixfile do
 
   defp deps do
     [ { :httpoison, "~> 0.3.0" },
-      { :hackney, github: "benoitc/hackney" },
+      { :hackney, "~> 0.13.0", github: "benoitc/hackney" },
       { :jsex, "~> 2.0.0" } ]
   end
 end
