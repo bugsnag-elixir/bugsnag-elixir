@@ -6,6 +6,9 @@ it needs is your API key (see example configuration in config/config.exs) and
 then reporting errors is as simple as:
 
 ```elixir
+# Warm up the engine
+Bugsnag.start
+
 try do
   :foo = :bar
 catch

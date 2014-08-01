@@ -7,10 +7,12 @@ defmodule Bugsnag do
   @notify_url "https://notify.bugsnag.com"
   @request_headers [{"Content-Type", "application/json"}]
 
+  use HTTPoison.Base
+
   # Public
 
   def crash(error) do
-    HTTPoison.post(@notify_url, payload(error), @request_headers)
+    post(@notify_url, payload(error), @request_headers)
   end
 
   # Private
