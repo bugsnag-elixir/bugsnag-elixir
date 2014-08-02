@@ -17,7 +17,7 @@ defmodule Bugsnag do
 
   # Private
 
-  defp payload(error) do
+  def payload(error) do
     { :ok, json } = %{}
     |> add_api_key
     |> add_notifier_info
