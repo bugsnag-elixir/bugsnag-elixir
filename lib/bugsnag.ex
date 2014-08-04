@@ -11,17 +11,17 @@ defmodule Bugsnag do
 
   # Public
 
-  def crash(error) do
-    post(@notify_url, payload(error), @request_headers)
+  def crash(exception) do
+    post(@notify_url, payload(exception), @request_headers)
   end
 
   # Private
 
-  def payload(error) do
+  def payload(exception) do
     { :ok, json } = %{}
     |> add_api_key
     |> add_notifier_info
-    |> add_event(error)
+    |> add_event(exception)
     |> JSEX.encode
     json
   end
@@ -35,8 +35,7 @@ defmodule Bugsnag do
     Map.put payload, :notifier, @notifier_info
   end
 
-  defp add_event(payload, error) do
-    exception = Exception.normalize(:error, error)
+  defp add_event(payload, exception) do
     Map.put payload, :events, [ %{
       payloadVersion: "2",
       exceptions: [ %{

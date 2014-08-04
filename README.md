@@ -11,8 +11,8 @@ Bugsnag.start
 
 try do
   :foo = :bar
-catch
-  _kind, error -> Bugsnag.crash(error)
+rescue
+  exception -> Bugsnag.crash(exception)
 end
 ```
 
