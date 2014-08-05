@@ -12,11 +12,9 @@ Bugsnag.start
 try do
   :foo = :bar
 rescue
-  exception -> Bugsnag.crash(exception)
+  exception -> Bugsnag.report(exception, System.stacktrace)
 end
 ```
-
-You probably need to add `:httpoison` to your applications list too.
 
 ## Roadmap
 

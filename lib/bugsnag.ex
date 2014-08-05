@@ -11,17 +11,21 @@ defmodule Bugsnag do
 
   # Public
 
-  def crash(exception) do
-    post(@notify_url, payload(exception), @request_headers)
+  # Currently we only support reporting exceptions.
+  def report(%{__exception__: true} = exception, stacktrace) do
+    post(@notify_url,
+         payload(exception, stacktrace),
+         @request_headers)
   end
 
   # Private
 
-  def payload(exception) do
+  defp payload(exception, stacktrace) do
+    IO.inspect exception
     { :ok, json } = %{}
     |> add_api_key
     |> add_notifier_info
-    |> add_event(exception)
+    |> add_event(exception, stacktrace)
     |> JSEX.encode
     json
   end
@@ -35,21 +39,20 @@ defmodule Bugsnag do
     Map.put payload, :notifier, @notifier_info
   end
 
-  defp add_event(payload, exception) do
+  defp add_event(payload, exception, stacktrace) do
     Map.put payload, :events, [ %{
       payloadVersion: "2",
       exceptions: [ %{
         errorClass: exception.__struct__,
         message: Exception.message(exception),
-        stacktrace: format_stacktrace
+        stacktrace: format_stacktrace(stacktrace)
       } ],
       severity: "error"
     } ]
   end
 
-  defp format_stacktrace do
-    System.stacktrace
-    |> Enum.map fn
+  defp format_stacktrace(stacktrace) do
+    Enum.map stacktrace, fn
       ({ module, function, arity, [] }) ->
         %{
           file: "unknown",
