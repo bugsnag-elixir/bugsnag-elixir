@@ -21,7 +21,6 @@ defmodule Bugsnag do
   # Private
 
   defp payload(exception, stacktrace) do
-    IO.inspect exception
     { :ok, json } = %{}
     |> add_api_key
     |> add_notifier_info
