@@ -21,12 +21,12 @@ defmodule Bugsnag do
   # Private
 
   defp payload(exception, stacktrace) do
-    { :ok, json } = %{}
+    %{}
     |> add_api_key
     |> add_notifier_info
     |> add_event(exception, stacktrace)
     |> JSEX.encode
-    json
+    |> elem(1)
   end
 
   defp add_api_key(payload) do
