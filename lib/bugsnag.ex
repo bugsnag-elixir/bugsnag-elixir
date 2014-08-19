@@ -14,17 +14,21 @@ defmodule Bugsnag do
   # Currently we only support reporting exceptions.
   def report(%{__exception__: true} = exception, stacktrace) do
     post(@notify_url,
-         payload(exception, stacktrace),
+         payload(exception, stacktrace) |> to_json,
          @request_headers)
   end
 
   # Private
 
-  defp payload(exception, stacktrace) do
+  def payload(exception, stacktrace) do
     %{}
     |> add_api_key
     |> add_notifier_info
     |> add_event(exception, stacktrace)
+  end
+
+  defp to_json(payload) do
+    payload
     |> JSEX.encode
     |> elem(1)
   end
