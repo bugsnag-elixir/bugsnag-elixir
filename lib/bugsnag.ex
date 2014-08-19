@@ -1,8 +1,8 @@
 defmodule Bugsnag do
   @notifier_info %{
     name: "Bugsnag Elixir",
-    version: "0.0.1",
-    url: "https://github.com/jarednorman/bugsnag-elixir",
+    version: Bugsnag.Mixfile.project[:version],
+    url: Bugsnag.Mixfile.project[:package][:links][:github],
   }
   @notify_url "https://notify.bugsnag.com"
   @request_headers [{"Content-Type", "application/json"}]
