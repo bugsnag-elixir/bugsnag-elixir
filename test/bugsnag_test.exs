@@ -41,4 +41,12 @@ defmodule BugsnagTest do
     %{apiKey: api_key} = Bugsnag.payload(exception, stacktrace)
     assert "LOLIGOTCHA" = api_key
   end
+
+  test "it reports the notifier" do
+    {exception, stacktrace} = get_problem
+    %{notifier: notifier} = Bugsnag.payload(exception, stacktrace)
+    assert %{name: "Bugsnag Elixir",
+             url: "https://github.com/jarednorman/bugsnag-elixir",
+             version: _} = notifier
+  end
 end
