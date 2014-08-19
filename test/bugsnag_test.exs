@@ -35,4 +35,10 @@ defmodule BugsnagTest do
             %{file: "test/bugsnag_test.exs", lineNumber: 8, method: "Elixir.BugsnagTest.get_problem/0"},
             %{file: "test/bugsnag_test.exs", lineNumber: _, method: _} | _] = stacktrace
   end
+
+  test "it sets the API key" do
+    {exception, stacktrace} = get_problem
+    %{apiKey: api_key} = Bugsnag.payload(exception, stacktrace)
+    assert "LOLIGOTCHA" = api_key
+  end
 end
