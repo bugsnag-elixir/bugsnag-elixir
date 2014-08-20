@@ -26,6 +26,12 @@ defmodule BugsnagTest do
     exception
   end
 
+  # I don't normally test that things don't happen, but in this case I would
+  # consider it mission-critical that the error reporter not raise errors.
+  test "it doesn't raise errors if you report garbage" do
+    Bugsnag.report(Enum, %{canadian: "beer"})
+  end
+
   test "it generates correct stacktraces" do
     {exception, stacktrace} = try do
       Enum.join(3, 'million')

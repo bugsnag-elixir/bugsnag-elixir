@@ -12,10 +12,12 @@ defmodule Bugsnag do
   # Public
 
   # Currently we only support reporting exceptions.
-  def report(%{__exception__: true} = exception, stacktrace) do
-    post(@notify_url,
-         payload(exception, stacktrace) |> to_json,
-         @request_headers)
+  def report(exception, stacktrace) do
+    spawn fn ->
+      post(@notify_url,
+           payload(exception, stacktrace) |> to_json,
+           @request_headers)
+    end
   end
 
   # Private
