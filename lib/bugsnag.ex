@@ -12,21 +12,21 @@ defmodule Bugsnag do
   # Public
 
   # Currently we only support reporting exceptions.
-  def report(exception, stacktrace) do
+  def report(exception, stacktrace, options \\ []) do
     spawn fn ->
       post(@notify_url,
-           payload(exception, stacktrace) |> to_json,
+           payload(exception, stacktrace, options) |> to_json,
            @request_headers)
     end
   end
 
   # Private
 
-  def payload(exception, stacktrace) do
+  def payload(exception, stacktrace, options) do
     %{}
     |> add_api_key
     |> add_notifier_info
-    |> add_event(exception, stacktrace)
+    |> add_event exception, stacktrace, Keyword.get(options, :context)
   end
 
   defp to_json(payload) do
@@ -44,7 +44,7 @@ defmodule Bugsnag do
     Map.put payload, :notifier, @notifier_info
   end
 
-  defp add_event(payload, exception, stacktrace) do
+  defp add_event(payload, exception, stacktrace, nil) do
     Map.put payload, :events, [ %{
       payloadVersion: "2",
       exceptions: [ %{
@@ -53,6 +53,19 @@ defmodule Bugsnag do
         stacktrace: format_stacktrace(stacktrace)
       } ],
       severity: "error"
+    } ]
+  end
+
+  defp add_event(payload, exception, stacktrace, context) do
+    Map.put payload, :events, [ %{
+      payloadVersion: "2",
+      exceptions: [ %{
+        errorClass: exception.__struct__,
+        message: Exception.message(exception),
+        stacktrace: format_stacktrace(stacktrace)
+      } ],
+      severity: "error",
+      context: context
     } ]
   end
 

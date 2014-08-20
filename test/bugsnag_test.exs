@@ -7,23 +7,26 @@ defmodule BugsnagTest do
       # You've been warned!
       Harbour.cats(3)
     rescue
-      exception -> {exception, System.stacktrace}
+      exception -> [exception, System.stacktrace]
     end
   end
 
-  def get_payload do
-    {exception, stacktrace} = get_problem
-    Bugsnag.payload(exception, stacktrace)
+  def get_payload(options \\ []) do
+    apply Bugsnag, :payload, List.insert_at(get_problem, -1, options)
   end
 
-  def get_event do
-    %{events: [event]} = get_payload
+  def get_event(options \\ []) do
+    %{events: [event]} = get_payload(options)
     event
   end
 
-  def get_exception do
-    %{exceptions: [ exception ]} = get_event
+  def get_exception(options \\ []) do
+    %{exceptions: [ exception ]} = get_event(options)
     exception
+  end
+
+  test "it adds the context when given" do
+    assert "Potato#cake" == get_event(context: "Potato#cake").context
   end
 
   # I don't normally test that things don't happen, but in this case I would
@@ -38,7 +41,7 @@ defmodule BugsnagTest do
     rescue
       exception -> {exception, System.stacktrace}
     end
-    %{events: [%{exceptions: [%{stacktrace: stacktrace}]}]} = Bugsnag.payload(exception, stacktrace)
+    %{events: [%{exceptions: [%{stacktrace: stacktrace}]}]} = Bugsnag.payload(exception, stacktrace, [])
     assert [%{file: "lib/enum.ex", lineNumber: _, method: _},
             %{file: "test/bugsnag_test.exs", lineNumber: _, method: "Elixir.BugsnagTest.test it generates correct stacktraces/1"}
             | _] = stacktrace
