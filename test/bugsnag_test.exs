@@ -11,8 +11,18 @@ defmodule BugsnagTest do
     end
   end
 
-  def get_exception(payload) do
-    %{events: [%{exceptions: [ exception ]}]} = payload
+  def get_payload do
+    {exception, stacktrace} = get_problem
+    Bugsnag.payload(exception, stacktrace)
+  end
+
+  def get_event do
+    %{events: [event]} = get_payload
+    event
+  end
+
+  def get_exception do
+    %{exceptions: [ exception ]} = get_event
     exception
   end
 
@@ -22,55 +32,41 @@ defmodule BugsnagTest do
     rescue
       exception -> {exception, System.stacktrace}
     end
-    %{stacktrace: stacktrace} = Bugsnag.payload(exception, stacktrace) |> get_exception
+    %{events: [%{exceptions: [%{stacktrace: stacktrace}]}]} = Bugsnag.payload(exception, stacktrace)
     assert [%{file: "lib/enum.ex", lineNumber: _, method: _},
             %{file: "test/bugsnag_test.exs", lineNumber: _, method: "Elixir.BugsnagTest.test it generates correct stacktraces/1"}
             | _] = stacktrace
   end
 
   test "it generates correct stacktraces when the current file was a script" do
-    {exception, stacktrace} = get_problem
-    %{stacktrace: stacktrace} = Bugsnag.payload(exception, stacktrace) |> get_exception
     assert [%{file: "unknown", lineNumber: 0, method: _},
             %{file: "test/bugsnag_test.exs", lineNumber: 8, method: "Elixir.BugsnagTest.get_problem/0"},
-            %{file: "test/bugsnag_test.exs", lineNumber: _, method: _} | _] = stacktrace
+            %{file: "test/bugsnag_test.exs", lineNumber: _, method: _} | _] = get_exception.stacktrace
   end
 
   test "it reports the error class" do
-    {exception, stacktrace} = get_problem
-    %{errorClass: error_class} = Bugsnag.payload(exception, stacktrace) |> get_exception
-    assert UndefinedFunctionError == error_class
+    assert UndefinedFunctionError == get_exception.errorClass
   end
 
   test "it reports the error message" do
-    {exception, stacktrace} = get_problem
-    %{message: message} = Bugsnag.payload(exception, stacktrace) |> get_exception
-    assert "undefined function: Harbour.cats/1" == message
+    assert "undefined function: Harbour.cats/1" == get_exception.message
   end
 
   test "it reports the error severity" do
-    {exception, stacktrace} = get_problem
-    %{events: [event]} = Bugsnag.payload(exception, stacktrace)
-    assert "error" == event.severity
+    assert "error" == get_event.severity
   end
 
   test "it reports the payload version" do
-    {exception, stacktrace} = get_problem
-    %{events: [event]} = Bugsnag.payload(exception, stacktrace)
-    assert "2" == event.payloadVersion
+    assert "2" == get_event.payloadVersion
   end
 
   test "it sets the API key" do
-    {exception, stacktrace} = get_problem
-    %{apiKey: api_key} = Bugsnag.payload(exception, stacktrace)
-    assert "LOLIGOTCHA" = api_key
+    assert "LOLIGOTCHA" = get_payload.apiKey
   end
 
   test "it reports the notifier" do
-    {exception, stacktrace} = get_problem
-    %{notifier: notifier} = Bugsnag.payload(exception, stacktrace)
     assert %{name: "Bugsnag Elixir",
              url: "https://github.com/jarednorman/bugsnag-elixir",
-             version: _} = notifier
+             version: _} = get_payload.notifier
   end
 end
