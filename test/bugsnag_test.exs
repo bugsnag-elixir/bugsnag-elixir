@@ -53,6 +53,18 @@ defmodule BugsnagTest do
             %{file: "test/bugsnag_test.exs", lineNumber: _, method: _} | _] = get_exception.stacktrace
   end
 
+  # NOTE: Regression test
+  test "it generates correct stacktraces when the method arguments are in place of arity" do
+    {exception, stacktrace} = try do
+      Fart.poo(:butts, 1, "foo\n")
+    rescue
+      exception -> {exception, System.stacktrace}
+    end
+    %{events: [%{exceptions: [%{stacktrace: stacktrace}]}]} = Bugsnag.payload(exception, stacktrace, [])
+    assert [%{file: "unknown", lineNumber: 0, method: "Elixir.Fart.poo(:butts, 1, \"foo\\n\")"},
+            %{file: "test/bugsnag_test.exs", lineNumber: _, method: _} | _] = stacktrace
+  end
+
   test "it reports the error class" do
     assert UndefinedFunctionError == get_exception.errorClass
   end

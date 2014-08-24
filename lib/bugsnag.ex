@@ -71,7 +71,13 @@ defmodule Bugsnag do
 
   defp format_stacktrace(stacktrace) do
     Enum.map stacktrace, fn
-      ({ module, function, arity, [] }) ->
+      ({ module, function, args, [] }) when is_list(args) ->
+        %{
+          file: "unknown",
+          lineNumber: 0,
+          method: "#{ module }.#{ function }(#{ args |> Enum.map(&(inspect(&1))) |> Enum.join(", ") })"
+        }
+      ({ module, function, arity, [] }) when is_number(arity) ->
         %{
           file: "unknown",
           lineNumber: 0,
