@@ -44,30 +44,28 @@ defmodule Bugsnag do
     Map.put payload, :notifier, @notifier_info
   end
 
-  defp add_event(payload, exception, stacktrace, nil) do
-    Map.put payload, :events, [ %{
-      payloadVersion: "2",
-      exceptions: [ %{
-        errorClass: exception.__struct__,
-        message: Exception.message(exception),
-        stacktrace: format_stacktrace(stacktrace)
-      } ],
-      severity: "error"
+  defp add_event(payload, exception, stacktrace, context) do
+    event = %{}
+    |> add_payload_version
+    |> add_exception(exception, stacktrace)
+    |> add_severity
+    |> add_context(context)
+    Map.put payload, :events, [event]
+  end
+
+  defp add_exception(event, exception, stacktrace) do
+    Map.put event, :exceptions, [ %{
+      errorClass: exception.__struct__,
+      message: Exception.message(exception),
+      stacktrace: format_stacktrace(stacktrace)
     } ]
   end
 
-  defp add_event(payload, exception, stacktrace, context) do
-    Map.put payload, :events, [ %{
-      payloadVersion: "2",
-      exceptions: [ %{
-        errorClass: exception.__struct__,
-        message: Exception.message(exception),
-        stacktrace: format_stacktrace(stacktrace)
-      } ],
-      severity: "error",
-      context: context
-    } ]
-  end
+  defp add_payload_version(event), do: Map.put(event, :payloadVersion, "2")
+  defp add_severity(event), do: Map.put(event, :severity, "error")
+
+  defp add_context(event, nil), do: event
+  defp add_context(event, context), do: Map.put(event, :context, context)
 
   defp format_stacktrace(stacktrace) do
     Enum.map stacktrace, fn
