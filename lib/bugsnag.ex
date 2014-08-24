@@ -36,7 +36,7 @@ defmodule Bugsnag do
   end
 
   defp add_api_key(payload) do
-    { _, api_key } = :application.get_env(:bugsnag, :api_key)
+    {_, api_key} = :application.get_env(:bugsnag, :api_key)
     Map.put payload, :apiKey, api_key
   end
 
@@ -54,11 +54,11 @@ defmodule Bugsnag do
   end
 
   defp add_exception(event, exception, stacktrace) do
-    Map.put event, :exceptions, [ %{
+    Map.put event, :exceptions, [%{
       errorClass: exception.__struct__,
       message: Exception.message(exception),
       stacktrace: format_stacktrace(stacktrace)
-    } ]
+    }]
   end
 
   defp add_payload_version(event), do: Map.put(event, :payloadVersion, "2")
@@ -73,7 +73,15 @@ defmodule Bugsnag do
         %{
           file: "unknown",
           lineNumber: 0,
-          method: "#{ module }.#{ function }(#{ args |> Enum.map(&(inspect(&1))) |> Enum.join(", ") })"
+          method: "#{
+              module
+            }.#{
+              function
+            }(#{
+              args
+              |> Enum.map(&(inspect(&1)))
+              |> Enum.join(", ")
+            })"
         }
       ({ module, function, arity, [] }) when is_number(arity) ->
         %{
@@ -81,7 +89,7 @@ defmodule Bugsnag do
           lineNumber: 0,
           method: "#{ module }.#{ function }/#{ arity }"
         }
-      ({ module, function, arity, [ file: file, line: line_number ] }) ->
+      ({ module, function, arity, [file: file, line: line_number] }) ->
         %{
           file: file |> List.to_string,
           lineNumber: line_number,
