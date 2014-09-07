@@ -70,7 +70,7 @@ defmodule BugsnagTest do
   end
 
   test "it reports the error message" do
-    assert "undefined function: Harbour.cats/1" == get_exception.message
+    assert "undefined function: Harbour.cats/1 (module Harbour is not available)" == get_exception.message
   end
 
   test "it reports the error severity" do

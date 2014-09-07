@@ -12,7 +12,7 @@ Bugsnag.start
 try do
   :foo = :bar
 rescue
-  exception -> Bugsnag.report(exception, System.stacktrace)
+  exception -> Bugsnag.report(exception)
 end
 ```
 

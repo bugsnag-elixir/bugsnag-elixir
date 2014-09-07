@@ -12,7 +12,7 @@ defmodule Bugsnag do
   # Public
 
   # Currently we only support reporting exceptions.
-  def report(exception, stacktrace, options \\ []) do
+  def report(exception, options \\ []) do
     spawn fn ->
       post(@notify_url,
            payload(exception, stacktrace, options) |> to_json,
@@ -97,4 +97,6 @@ defmodule Bugsnag do
         }
     end
   end
+
+  defp stacktrace, do: System.stacktrace
 end
