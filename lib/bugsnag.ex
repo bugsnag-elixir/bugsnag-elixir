@@ -5,9 +5,6 @@ defmodule Bugsnag do
   alias Bugsnag.Payload
   use HTTPoison.Base
 
-  # Public
-
-  # Currently we only support reporting exceptions.
   def report(exception, options \\ []) do
     spawn fn ->
       post(@notify_url,
@@ -16,7 +13,6 @@ defmodule Bugsnag do
     end
   end
 
-  # Private
   defp to_json(payload) do
     payload
     |> JSEX.encode
