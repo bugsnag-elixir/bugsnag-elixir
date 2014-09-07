@@ -5,20 +5,17 @@ defmodule Bugsnag.Payload do
     url: Bugsnag.Mixfile.project[:package][:links][:github],
   }
 
+  defstruct apiKey: nil, notifier: @notifier_info, events: nil
+
   def new(exception, stacktrace, options) do
-    %{}
+    %__MODULE__{}
     |> add_api_key
-    |> add_notifier_info
     |> add_event exception, stacktrace, Keyword.get(options, :context)
   end
 
   defp add_api_key(payload) do
     {_, api_key} = :application.get_env(:bugsnag, :api_key)
     Map.put payload, :apiKey, api_key
-  end
-
-  defp add_notifier_info(payload)do
-    Map.put payload, :notifier, @notifier_info
   end
 
   defp add_event(payload, exception, stacktrace, context) do
