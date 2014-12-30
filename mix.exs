@@ -25,6 +25,6 @@ defmodule Bugsnag.Mixfile do
   defp deps do
     [{:httpoison, "~> 0.5.0"},
      {:hackney, "~> 0.14.1"},
-     {:jsex, "~> 2.0.0"}]
+     {:exjsx, "~> 3.1.0"}]
   end
 end
