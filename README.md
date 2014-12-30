@@ -1,24 +1,30 @@
-Bugsnag Elixir
-==============
+# Bugsnag Elixir
 
 Capture exceptions and send them to the [Bugsnag](http://bugsnag.com) API! All
 it needs is your API key (see example configuration in config/config.exs) and
-then reporting errors is as simple as:
+
+## Installation
 
 ```elixir
-# Warm up the engine
+# Add it to your deps in your projects mix.exs
+defp deps do
+  [{:bugsnag, "~> 1.0.0"}]
+end
+
+# Open up your config/config.exs (or appropriate project config)
+config :bugsnag, api_key: "bbf085fc54ff99498ebd18ab49a832dd"
+```
+
+## Usage
+
+```elixir
+# Turn the lights on.
 Bugsnag.start
 
+# Report an exception.
 try do
   :foo = :bar
 rescue
   exception -> Bugsnag.report(exception)
 end
 ```
-
-## Roadmap
-
-In the future it will be able report optional information that Bugsnag accepts
-like session, user and context information. I'll be adding those features as I
-build out [an integration](https://github.com/jarednorman/plugsnag) for
-[Plug](https://github.com/elixir-lang/plug)/[Phoenix](https://github.com/phoenixframework/phoenix).
