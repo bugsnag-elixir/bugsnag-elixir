@@ -1,7 +1,6 @@
 # Bugsnag Elixir
 
-Capture exceptions and send them to the [Bugsnag](http://bugsnag.com) API! All
-it needs is your API key (see example configuration in config/config.exs) and
+Capture exceptions and send them to the [Bugsnag](http://bugsnag.com) API!
 
 ## Installation
 
