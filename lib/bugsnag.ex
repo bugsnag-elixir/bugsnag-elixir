@@ -15,7 +15,7 @@ defmodule Bugsnag do
 
   defp to_json(payload) do
     payload
-    |> JSEX.encode
+    |> JSX.encode
     |> elem(1)
   end
   defp stacktrace, do: System.stacktrace
