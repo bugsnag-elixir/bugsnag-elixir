@@ -6,14 +6,15 @@ it needs is your API key (see example configuration in config/config.exs) and
 then reporting errors is as simple as:
 
 ```elixir
+# Warm up the engine
+Bugsnag.start
+
 try do
   :foo = :bar
-catch
-  _kind, error -> Bugsnag.crash(error)
+rescue
+  exception -> Bugsnag.report(exception)
 end
 ```
-
-You probably need to add `:httpoison` to your applications list too.
 
 ## Roadmap
 
