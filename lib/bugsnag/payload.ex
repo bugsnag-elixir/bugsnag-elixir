@@ -14,7 +14,7 @@ defmodule Bugsnag.Payload do
   end
 
   defp add_api_key(payload) do
-    {_, api_key} = :application.get_env(:bugsnag, :api_key)
+    {_, api_key} = Application.get_env(:bugsnag, :api_key)
     Map.put payload, :apiKey, api_key
   end
 
