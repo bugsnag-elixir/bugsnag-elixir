@@ -78,7 +78,7 @@ defmodule Bugsnag.PayloadTest do
   end
 
   test "it sets the API key" do
-    assert "LOLIGOTCHA" = get_payload.apiKey
+    assert Application.get_env(:bugsnag, :api_key) == get_payload.apiKey
   end
 
   test "it reports the notifier" do
