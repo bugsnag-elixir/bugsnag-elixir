@@ -8,15 +8,14 @@ defmodule Bugsnag do
   def report(exception, options \\ []) do
     spawn fn ->
       post(@notify_url,
-           Payload.new(exception, stacktrace, options) |> to_json,
+           Payload.new(exception, System.stacktrace, options) |> to_json,
            @request_headers)
     end
   end
 
-  defp to_json(payload) do
+  def to_json(payload) do
     payload
     |> JSX.encode
     |> elem(1)
   end
-  defp stacktrace, do: System.stacktrace
 end

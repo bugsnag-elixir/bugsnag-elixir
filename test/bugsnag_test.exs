@@ -1,8 +1,12 @@
 defmodule BugsnagTest do
   use ExUnit.Case
-  # I don't normally test that things don't happen, but in this case I would
-  # consider it mission-critical that the error reporter not raise errors.
+
   test "it doesn't raise errors if you report garbage" do
     Bugsnag.report(Enum, %{canadian: "beer"})
+  end
+
+  test "it can encode json" do
+    assert Bugsnag.to_json(%{foo: 3, bar: "baz"}) ==
+      "{\"bar\":\"baz\",\"foo\":3}"
   end
 end
