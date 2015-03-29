@@ -47,32 +47,27 @@ defmodule Bugsnag.Payload do
 
   defp format_stacktrace(stacktrace) do
     Enum.map stacktrace, fn
-      ({ module, function, args, [] }) when is_list(args) ->
+      ({ module, function, args, [] }) ->
         %{
           file: "unknown",
           lineNumber: 0,
-          method: "#{
-              module
-            }.#{
-              function
-            }(#{
-              args
-              |> Enum.map(&(inspect(&1)))
-              |> Enum.join(", ")
-            })"
+          method: "#{ module }.#{ function }#{ format_args(args) }"
         }
-      ({ module, function, arity, [] }) when is_number(arity) ->
-        %{
-          file: "unknown",
-          lineNumber: 0,
-          method: "#{ module }.#{ function }/#{ arity }"
-        }
-      ({ module, function, arity, [file: file, line: line_number] }) ->
+      ({ module, function, args, [file: file, line: line_number] }) ->
         %{
           file: file |> List.to_string,
           lineNumber: line_number,
-          method: "#{ module }.#{ function }/#{ arity }"
+          method: "#{ module }.#{ function }#{ format_args(args) }"
         }
     end
+  end
+
+  defp format_args(args) when is_integer(args) do
+    "/#{args}"
+  end
+  defp format_args(args) when is_list(args) do
+    "(#{args
+        |> Enum.map(&(inspect(&1)))
+        |> Enum.join(", ")})"
   end
 end
