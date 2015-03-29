@@ -10,7 +10,7 @@ defmodule Bugsnag.Payload do
   def new(exception, stacktrace, options) do
     %__MODULE__{}
     |> add_api_key
-    |> add_event exception, stacktrace, Keyword.get(options, :context)
+    |> add_event exception, stacktrace, Keyword.get(options, :context), Keyword.get(options, :metadata)
   end
 
   defp add_api_key(payload) do
@@ -18,12 +18,13 @@ defmodule Bugsnag.Payload do
     |> Map.put :apiKey, Application.get_env(:bugsnag, :api_key)
   end
 
-  defp add_event(payload, exception, stacktrace, context) do
+  defp add_event(payload, exception, stacktrace, context, metadata) do
     event = %{}
     |> add_payload_version
     |> add_exception(exception, stacktrace)
     |> add_severity
     |> add_context(context)
+    |> add_metadata(metadata)
     Map.put payload, :events, [event]
   end
 
@@ -40,6 +41,9 @@ defmodule Bugsnag.Payload do
 
   defp add_context(event, nil), do: event
   defp add_context(event, context), do: Map.put(event, :context, context)
+
+  defp add_metadata(event, nil), do: event
+  defp add_metadata(event, metadata), do: Map.put(event, :metadata, metadata)
 
   defp format_stacktrace(stacktrace) do
     Enum.map stacktrace, fn
