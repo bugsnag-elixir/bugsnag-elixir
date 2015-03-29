@@ -86,4 +86,8 @@ defmodule Bugsnag.PayloadTest do
              url: "https://github.com/jarednorman/bugsnag-elixir",
              version: _} = get_payload.notifier
   end
+
+  test "it adds metadata" do
+    assert %{"app" => "my-app"} == get_event(metadata: %{"app" => "my-app"}).metaData
+  end
 end

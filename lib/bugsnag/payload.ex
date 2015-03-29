@@ -43,7 +43,7 @@ defmodule Bugsnag.Payload do
   defp add_context(event, context), do: Map.put(event, :context, context)
 
   defp add_metadata(event, nil), do: event
-  defp add_metadata(event, metadata), do: Map.put(event, :metadata, metadata)
+  defp add_metadata(event, metadata), do: Map.put(event, :metaData, metadata)
 
   defp format_stacktrace(stacktrace) do
     Enum.map stacktrace, fn
