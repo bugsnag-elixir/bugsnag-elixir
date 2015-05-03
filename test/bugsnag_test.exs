@@ -15,6 +15,6 @@ defmodule BugsnagTest do
 
   test "it can encode json" do
     assert Bugsnag.to_json(%{foo: 3, bar: "baz"}) ==
-      "{\"bar\":\"baz\",\"foo\":3}"
+      "{\"foo\":3,\"bar\":\"baz\"}"
   end
 end

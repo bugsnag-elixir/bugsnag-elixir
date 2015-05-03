@@ -16,7 +16,6 @@ defmodule Bugsnag do
 
   def to_json(payload) do
     payload
-    |> JSX.encode
-    |> elem(1)
+    |> Poison.encode!
   end
 end
