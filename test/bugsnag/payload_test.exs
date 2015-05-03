@@ -71,6 +71,9 @@ defmodule Bugsnag.PayloadTest do
 
   test "it reports the error severity" do
     assert "error" == get_event.severity
+    assert "info" == get_event(severity: "info").severity
+    assert "warning" == get_event(severity: "warning").severity
+    assert "error" == get_event(severity: "").severity
   end
 
   test "it reports the payload version" do

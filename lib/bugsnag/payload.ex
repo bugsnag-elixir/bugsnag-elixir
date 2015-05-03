@@ -10,7 +10,7 @@ defmodule Bugsnag.Payload do
   def new(exception, stacktrace, options) do
     %__MODULE__{}
     |> add_api_key
-    |> add_event exception, stacktrace, Keyword.get(options, :context)
+    |> add_event exception, stacktrace, Keyword.get(options, :context), Keyword.get(options, :severity)
   end
 
   defp add_api_key(payload) do
@@ -18,11 +18,11 @@ defmodule Bugsnag.Payload do
     |> Map.put :apiKey, Application.get_env(:bugsnag, :api_key)
   end
 
-  defp add_event(payload, exception, stacktrace, context) do
+  defp add_event(payload, exception, stacktrace, context, severity) do
     event = %{}
     |> add_payload_version
     |> add_exception(exception, stacktrace)
-    |> add_severity
+    |> add_severity(severity)
     |> add_context(context)
     Map.put payload, :events, [event]
   end
@@ -36,7 +36,9 @@ defmodule Bugsnag.Payload do
   end
 
   defp add_payload_version(event), do: Map.put(event, :payloadVersion, "2")
-  defp add_severity(event), do: Map.put(event, :severity, "error")
+
+  defp add_severity(event, severity) when severity in ~w(error warning info), do: Map.put(event, :severity, severity)
+  defp add_severity(event, _), do: Map.put(event, :severity, "error")
 
   defp add_context(event, nil), do: event
   defp add_context(event, context), do: Map.put(event, :context, context)
