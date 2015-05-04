@@ -10,7 +10,10 @@ defmodule Bugsnag.Payload do
   def new(exception, stacktrace, options) do
     %__MODULE__{}
     |> add_api_key
-    |> add_event exception, stacktrace, Keyword.get(options, :context), Keyword.get(options, :severity)
+    |> add_event(exception,
+                 stacktrace,
+                 Keyword.get(options, :context),
+                 Keyword.get(options, :severity)
   end
 
   defp add_api_key(payload) do
