@@ -26,6 +26,7 @@ defmodule Bugsnag.Payload do
       |> add_severity(Keyword.get(options, :severity))
       |> add_context(Keyword.get(options, :context))
       |> add_user(Keyword.get(options, :user))
+      |> add_metadata(Keyword.get(options, :metadata))
       |> add_env
 
     Map.put payload, :events, [event]
@@ -49,6 +50,9 @@ defmodule Bugsnag.Payload do
 
   defp add_user(event, nil), do: event
   defp add_user(event, user), do: Map.put(event, :user, user)
+
+  defp add_metadata(event, nil), do: event
+  defp add_metadata(event, metadata), do: Map.put(event, :metaData, metadata)
 
   defp add_env(event), do: Map.put(event, :app, %{releaseStage: Mix.env})
 
