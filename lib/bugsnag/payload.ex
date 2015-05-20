@@ -13,7 +13,7 @@ defmodule Bugsnag.Payload do
     |> add_event(exception,
                  stacktrace,
                  Keyword.get(options, :context),
-                 Keyword.get(options, :severity)
+                 Keyword.get(options, :severity))
   end
 
   defp add_api_key(payload) do
