@@ -47,7 +47,7 @@ defmodule Bugsnag.Payload do
   defp add_context(event, nil), do: event
   defp add_context(event, context), do: Map.put(event, :context, context)
 
-  defp add_user(event, nil), do: Event
+  defp add_user(event, nil), do: event
   defp add_user(event, user), do: Map.put(event, :user, user)
 
   defp add_env(event), do: Map.put(event, :app, %{releaseStage: Mix.env})
