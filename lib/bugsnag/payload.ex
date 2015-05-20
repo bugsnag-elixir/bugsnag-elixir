@@ -14,6 +14,7 @@ defmodule Bugsnag.Payload do
                  stacktrace,
                  Keyword.get(options, :context),
                  Keyword.get(options, :severity)
+                 )
   end
 
   defp add_api_key(payload) do
