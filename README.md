@@ -17,8 +17,6 @@ config :bugsnag, api_key: "bbf085fc54ff99498ebd18ab49a832dd"
 ## Usage
 
 ```elixir
-# Turn the lights on.
-Bugsnag.start
 
 # Report an exception.
 try do
