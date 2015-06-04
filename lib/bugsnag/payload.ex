@@ -77,9 +77,10 @@ defmodule Bugsnag.Payload do
   end
 
   defp get_file_contents(file, line_number) do
-    if String.starts_with? file, "web" do
-      File.cwd!
-      |> Path.join(file)
+    file = File.cwd! |> Path.join(file)
+
+    if File.exists?(file) do
+      file
       |> File.stream!
       |> Stream.with_index
       |> Stream.map(fn({line, index}) -> {to_string(index + 1), line} end)
