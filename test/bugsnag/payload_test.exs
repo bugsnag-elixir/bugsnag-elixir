@@ -76,6 +76,13 @@ defmodule Bugsnag.PayloadTest do
     assert "error" == get_event(severity: "").severity
   end
 
+  test "it reports the release_stage" do
+    assert "production" == get_event.app.releaseStage
+    assert "staging" == get_event(releaseStage: "staging").app.releaseStage
+    assert "qa" == get_event(releaseStage: "qa").app.releaseStage
+    assert "" == get_event(releaseStage: "").app.releaseStage
+  end
+
   test "it reports the payload version" do
     assert "2" == get_event.payloadVersion
   end
