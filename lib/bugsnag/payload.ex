@@ -13,7 +13,8 @@ defmodule Bugsnag.Payload do
     |> add_event(exception,
                  stacktrace,
                  Keyword.get(options, :context),
-                 Keyword.get(options, :severity))
+                 Keyword.get(options, :severity),
+                 Keyword.get(options, :releaseStage))
   end
 
   defp add_api_key(payload) do
@@ -21,12 +22,13 @@ defmodule Bugsnag.Payload do
     |> Map.put :apiKey, Application.get_env(:bugsnag, :api_key)
   end
 
-  defp add_event(payload, exception, stacktrace, context, severity) do
+  defp add_event(payload, exception, stacktrace, context, severity, releaseStage) do
     event = %{}
     |> add_payload_version
     |> add_exception(exception, stacktrace)
     |> add_severity(severity)
     |> add_context(context)
+    |> add_releaseStage(releaseStage)
     Map.put payload, :events, [event]
   end
 
@@ -42,6 +44,9 @@ defmodule Bugsnag.Payload do
 
   defp add_severity(event, severity) when severity in ~w(error warning info), do: Map.put(event, :severity, severity)
   defp add_severity(event, _), do: Map.put(event, :severity, "error")
+
+  defp add_releaseStage(event, releaseStage) when is_binary(releaseStage), do: Map.put(event, :app, %{releaseStage: releaseStage})
+  defp add_releaseStage(event, _), do: Map.put(event, :app, %{releaseStage: "production"})
 
   defp add_context(event, nil), do: event
   defp add_context(event, context), do: Map.put(event, :context, context)
