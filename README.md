@@ -10,6 +10,11 @@ defp deps do
   [{:bugsnag, "~> 1.0.0"}]
 end
 
+# Now, list the :bugsnag application as your application dependency:
+def application do
+  [applications: [:bugsnag]]
+end
+
 # Open up your config/config.exs (or appropriate project config)
 config :bugsnag, api_key: "bbf085fc54ff99498ebd18ab49a832dd"
 ```
@@ -17,9 +22,6 @@ config :bugsnag, api_key: "bbf085fc54ff99498ebd18ab49a832dd"
 ## Usage
 
 ```elixir
-# Turn the lights on.
-Bugsnag.start
-
 # Report an exception.
 try do
   :foo = :bar

@@ -4,7 +4,7 @@ defmodule Bugsnag.Mixfile do
   def project do
     [app: :bugsnag,
      version: "1.1.1",
-     elixir: "~> 1.0.2",
+     elixir: "~> 1.0",
      package: package,
      description: """
        An Elixir interface to the Bugsnag API
@@ -19,7 +19,7 @@ defmodule Bugsnag.Mixfile do
   end
 
   def application do
-    [applications: []]
+    [applications: [:httpoison]]
   end
 
   defp deps do
