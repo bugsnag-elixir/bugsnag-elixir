@@ -22,7 +22,7 @@ defmodule Bugsnag.PayloadTest do
   end
 
   def get_exception(options \\ []) do
-    %{exceptions: [ exception ]} = get_event(options)
+    %{exceptions: [exception]} = get_event(options)
     exception
   end
 
@@ -76,11 +76,11 @@ defmodule Bugsnag.PayloadTest do
     assert "error" == get_event(severity: "").severity
   end
 
-  test "it reports the release_stage" do
+  test "it reports the release stage" do
     assert "production" == get_event.app.releaseStage
-    assert "staging" == get_event(releaseStage: "staging").app.releaseStage
-    assert "qa" == get_event(releaseStage: "qa").app.releaseStage
-    assert "" == get_event(releaseStage: "").app.releaseStage
+    assert "staging" == get_event(release_stage: "staging").app.releaseStage
+    assert "qa" == get_event(release_stage: "qa").app.releaseStage
+    assert "" == get_event(release_stage: "").app.releaseStage
   end
 
   test "it reports the payload version" do
