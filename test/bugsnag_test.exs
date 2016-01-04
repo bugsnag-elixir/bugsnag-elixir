@@ -7,7 +7,7 @@ defmodule BugsnagTest do
 
   test "it handles real errors" do
     try do
-      :foo = :bar
+      :foo == :bar
     rescue
       exception -> Bugsnag.report(exception)
     end

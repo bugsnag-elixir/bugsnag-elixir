@@ -19,7 +19,7 @@ defmodule Bugsnag.Payload do
 
   defp add_api_key(payload) do
     payload
-    |> Map.put :apiKey, Application.get_env(:bugsnag, :api_key)
+    |> Map.put(:apiKey, Application.get_env(:bugsnag, :api_key))
   end
 
   defp add_event(payload, exception, stacktrace, context, severity, releaseStage) do
