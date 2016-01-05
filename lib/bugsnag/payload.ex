@@ -14,7 +14,8 @@ defmodule Bugsnag.Payload do
                  stacktrace,
                  Keyword.get(options, :context),
                  Keyword.get(options, :severity),
-                 Keyword.get(options, :release_stage))
+                 Keyword.get(options, :release_stage),
+                 Keyword.get(options, :metadata))
   end
 
   defp add_api_key(payload) do
@@ -22,13 +23,14 @@ defmodule Bugsnag.Payload do
     |> Map.put(:apiKey, Application.get_env(:bugsnag, :api_key))
   end
 
-  defp add_event(payload, exception, stacktrace, context, severity, release_stage) do
+  defp add_event(payload, exception, stacktrace, context, severity, release_stage, metadata) do
     event = %{}
     |> add_payload_version
     |> add_exception(exception, stacktrace)
     |> add_severity(severity)
     |> add_context(context)
     |> add_release_stage(release_stage)
+    |> add_metadata(metadata)
     Map.put payload, :events, [event]
   end
 
@@ -50,6 +52,9 @@ defmodule Bugsnag.Payload do
 
   defp add_context(event, nil), do: event
   defp add_context(event, context), do: Map.put(event, :context, context)
+
+  defp add_metadata(event, nil), do: event
+  defp add_metadata(event, metadata), do: Map.put(event, :metaData, metadata)
 
   defp format_stacktrace(stacktrace) do
     Enum.map stacktrace, fn

@@ -30,6 +30,14 @@ defmodule Bugsnag.PayloadTest do
     assert "Potato#cake" == get_event(context: "Potato#cake").context
   end
 
+  test "it adds metadata when given" do
+    metadata = %{some_data: %{some_more: "some string"}}
+    assert metadata == get_event(metadata: metadata).metaData
+  end
+
+  test "metaData is nil when not given" do
+    refute Map.has_key?(get_event, :metaData)
+  end
 
   test "it generates correct stacktraces" do
     {exception, stacktrace} = try do
