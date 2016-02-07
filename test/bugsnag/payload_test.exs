@@ -40,20 +40,22 @@ defmodule Bugsnag.PayloadTest do
   end
 
   test "it generates correct stacktraces" do
-    {exception, stacktrace} = try do
-      Enum.join(3, 'million')
-    rescue
-      exception -> {exception, System.stacktrace}
-    end
+    {exception, stacktrace} =
+      try do
+        Enum.join(3, 'million')
+      rescue
+        exception -> {exception, System.stacktrace}
+      end
+
     %{events: [%{exceptions: [%{stacktrace: stacktrace}]}]} = Payload.new(exception, stacktrace, [])
     assert [%{file: "lib/enum.ex", lineNumber: _, method: _},
-            %{file: "test/bugsnag/payload_test.exs", lineNumber: _, method: "Elixir.Bugsnag.PayloadTest.test it generates correct stacktraces/1"}
+            %{file: "test/bugsnag/payload_test.exs", lineNumber: _, method: ~s(Bugsnag.PayloadTest."test it generates correct stacktraces"/1)}
             | _] = stacktrace
   end
 
   test "it generates correct stacktraces when the current file was a script" do
     assert [%{file: "unknown", lineNumber: 0, method: _},
-            %{file: "test/bugsnag/payload_test.exs", lineNumber: 9, method: "Elixir.Bugsnag.PayloadTest.get_problem/0"},
+            %{file: "test/bugsnag/payload_test.exs", lineNumber: 9, method: "Bugsnag.PayloadTest.get_problem/0"},
             %{file: "test/bugsnag/payload_test.exs", lineNumber: _, method: _} | _] = get_exception.stacktrace
   end
 
@@ -65,8 +67,8 @@ defmodule Bugsnag.PayloadTest do
       exception -> {exception, System.stacktrace}
     end
     %{events: [%{exceptions: [%{stacktrace: stacktrace}]}]} = Payload.new(exception, stacktrace, [])
-    assert [%{file: "unknown", lineNumber: 0, method: "Elixir.Fart.poo(:butts, 1, \"foo\\n\")"},
-            %{file: "test/bugsnag/payload_test.exs", lineNumber: _, method: _} | _] = stacktrace
+    assert [%{file: "unknown", lineNumber: 0, method: "Fart.poo(:butts, 1, \"foo\\n\")"},
+            %{file: "test/bugsnag/payload_test.exs", lineNumber: _, method: _, code: _} | _] = stacktrace
   end
 
   test "it reports the error class" do
@@ -74,7 +76,7 @@ defmodule Bugsnag.PayloadTest do
   end
 
   test "it reports the error message" do
-    assert "undefined function: Harbour.cats/1 (module Harbour is not available)" == get_exception.message
+    assert "undefined function Harbour.cats/1 (module Harbour is not available)" == get_exception.message
   end
 
   test "it reports the error severity" do
@@ -85,10 +87,10 @@ defmodule Bugsnag.PayloadTest do
   end
 
   test "it reports the release stage" do
-    assert "production" == get_event.app.releaseStage
+    assert "test"    == get_event.app.releaseStage
     assert "staging" == get_event(release_stage: "staging").app.releaseStage
-    assert "qa" == get_event(release_stage: "qa").app.releaseStage
-    assert "" == get_event(release_stage: "").app.releaseStage
+    assert "qa"      == get_event(release_stage: "qa").app.releaseStage
+    assert ""        == get_event(release_stage: "").app.releaseStage
   end
 
   test "it reports the payload version" do
