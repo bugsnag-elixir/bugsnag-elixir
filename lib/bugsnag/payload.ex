@@ -64,9 +64,8 @@ defmodule Bugsnag.Payload do
           method: Exception.format_mfa(module, function, args)
         }
       ({ module, function, args, [file: file, line: line_number] }) ->
-        file = List.to_string file
         %{
-          file: file,
+          file: List.to_string(file),
           lineNumber: line_number,
           inProject: String.starts_with?(file, "web"),
           method: Exception.format_mfa(module, function, args),
