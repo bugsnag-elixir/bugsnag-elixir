@@ -22,7 +22,7 @@ defmodule Bugsnag.PayloadTest do
   end
 
   def get_exception(options \\ []) do
-    %{exceptions: [ exception ]} = get_event(options)
+    %{exceptions: [exception]} = get_event(options)
     exception
   end
 
@@ -30,6 +30,14 @@ defmodule Bugsnag.PayloadTest do
     assert "Potato#cake" == get_event(context: "Potato#cake").context
   end
 
+  test "it adds metadata when given" do
+    metadata = %{some_data: %{some_more: "some string"}}
+    assert metadata == get_event(metadata: metadata).metaData
+  end
+
+  test "metaData is nil when not given" do
+    refute Map.has_key?(get_event, :metaData)
+  end
 
   test "it generates correct stacktraces" do
     {exception, stacktrace} = try do
@@ -74,6 +82,13 @@ defmodule Bugsnag.PayloadTest do
     assert "info" == get_event(severity: "info").severity
     assert "warning" == get_event(severity: "warning").severity
     assert "error" == get_event(severity: "").severity
+  end
+
+  test "it reports the release stage" do
+    assert "production" == get_event.app.releaseStage
+    assert "staging" == get_event(release_stage: "staging").app.releaseStage
+    assert "qa" == get_event(release_stage: "qa").app.releaseStage
+    assert "" == get_event(release_stage: "").app.releaseStage
   end
 
   test "it reports the payload version" do
