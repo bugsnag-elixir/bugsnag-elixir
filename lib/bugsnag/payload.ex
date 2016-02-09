@@ -64,10 +64,11 @@ defmodule Bugsnag.Payload do
           method: Exception.format_mfa(module, function, args)
         }
       ({ module, function, args, [file: file, line: line_number] }) ->
+        file = to_string file
         %{
-          file: List.to_string(file),
+          file: file,
           lineNumber: line_number,
-          inProject: String.starts_with?(file, "web"),
+          inProject: Regex.match?(~r/^(lib|web)/, file),
           method: Exception.format_mfa(module, function, args),
           code: get_file_contents(file, line_number)
         }
