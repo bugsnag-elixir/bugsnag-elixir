@@ -6,12 +6,10 @@ defmodule Bugsnag do
   use HTTPoison.Base
 
   def report(exception, options \\ []) do
-    stacktrace = System.stacktrace
-    spawn fn ->
-      post(@notify_url,
-           Payload.new(exception, stacktrace, options) |> to_json,
-           @request_headers)
-    end
+    stacktrace = Keyword.get(options, :custom_stacktrace) || System.stacktrace
+    payload = Payload.new(exception, stacktrace, options) |> to_json
+
+    post(@notify_url, payload, @request_headers)
   end
 
   def to_json(payload) do
