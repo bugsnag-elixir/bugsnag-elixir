@@ -9,7 +9,9 @@ defmodule Bugsnag do
     stacktrace = Keyword.get(options, :custom_stacktrace) || System.stacktrace
     payload = Payload.new(exception, stacktrace, options) |> to_json
 
-    post(@notify_url, payload, @request_headers)
+    spawn fn ->
+      post(@notify_url, payload, @request_headers)
+    end
   end
 
   def to_json(payload) do
