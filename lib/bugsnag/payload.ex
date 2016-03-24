@@ -9,7 +9,7 @@ defmodule Bugsnag.Payload do
 
   def new(exception, stacktrace, options) do
     %__MODULE__{}
-    |> add_api_key
+    |> add_api_key()
     |> add_event(exception,
                  stacktrace,
                  Keyword.get(options, :context),
@@ -48,7 +48,7 @@ defmodule Bugsnag.Payload do
   defp add_severity(event, _), do: Map.put(event, :severity, "error")
 
   defp add_release_stage(event, release_stage) when is_binary(release_stage), do: Map.put(event, :app, %{releaseStage: release_stage})
-  defp add_release_stage(event, _), do: Map.put(event, :app, %{releaseStage: "production"})
+  defp add_release_stage(event, _), do: Map.put(event, :app, %{releaseStage: Application.get_env(:bugsnag, :release_stage, "production")})
 
   defp add_context(event, nil), do: event
   defp add_context(event, context), do: Map.put(event, :context, context)

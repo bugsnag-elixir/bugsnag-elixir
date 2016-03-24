@@ -89,6 +89,10 @@ defmodule Bugsnag.PayloadTest do
     assert "staging" == get_event(release_stage: "staging").app.releaseStage
     assert "qa" == get_event(release_stage: "qa").app.releaseStage
     assert "" == get_event(release_stage: "").app.releaseStage
+
+    Application.put_env(:bugsnag, :release_stage, "dev")
+    assert "dev" == get_event().app.releaseStage
+    Application.delete_env(:bugsnag, :release_stage)
   end
 
   test "it reports the payload version" do
