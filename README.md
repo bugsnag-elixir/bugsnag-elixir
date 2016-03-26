@@ -1,3 +1,5 @@
+### This project is looking for a maintainer. As much as I love the language, ecosystem, community around Elixir, I'm not currently lucky enough to be doing any serious work in the language. If someone would like to take some responsibility for the project I would hugely appreciate it.
+
 # Bugsnag Elixir
 
 Capture exceptions and send them to the [Bugsnag](http://bugsnag.com) API!
