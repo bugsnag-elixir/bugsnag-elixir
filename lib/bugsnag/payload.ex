@@ -10,27 +10,24 @@ defmodule Bugsnag.Payload do
   def new(exception, stacktrace, options) do
     %__MODULE__{}
     |> add_api_key
-    |> add_event(exception,
-                 stacktrace,
-                 Keyword.get(options, :context),
-                 Keyword.get(options, :severity),
-                 Keyword.get(options, :release_stage),
-                 Keyword.get(options, :metadata))
+    |> add_event(exception, stacktrace, options)
   end
 
   defp add_api_key(payload) do
-    payload
-    |> Map.put(:apiKey, Application.get_env(:bugsnag, :api_key))
+    Map.put payload, :apiKey, Application.get_env(:bugsnag, :api_key)
   end
 
-  defp add_event(payload, exception, stacktrace, context, severity, release_stage, metadata) do
-    event = %{}
-    |> add_payload_version
-    |> add_exception(exception, stacktrace)
-    |> add_severity(severity)
-    |> add_context(context)
-    |> add_release_stage(release_stage)
-    |> add_metadata(metadata)
+  defp add_event(payload, exception, stacktrace, options) do
+    event =
+      Map.new
+      |> add_payload_version
+      |> add_exception(exception, stacktrace)
+      |> add_severity(Keyword.get(options, :severity))
+      |> add_context(Keyword.get(options, :context))
+      |> add_user(Keyword.get(options, :user))
+      |> add_metadata(Keyword.get(options, :metadata))
+      |> add_release_stage(Keyword.get(options, :release_stage, to_string Mix.env))
+
     Map.put payload, :events, [event]
   end
 
@@ -47,11 +44,13 @@ defmodule Bugsnag.Payload do
   defp add_severity(event, severity) when severity in ~w(error warning info), do: Map.put(event, :severity, severity)
   defp add_severity(event, _), do: Map.put(event, :severity, "error")
 
-  defp add_release_stage(event, release_stage) when is_binary(release_stage), do: Map.put(event, :app, %{releaseStage: release_stage})
-  defp add_release_stage(event, _), do: Map.put(event, :app, %{releaseStage: "production"})
+  defp add_release_stage(event, release_stage), do: Map.put(event, :app, %{releaseStage: release_stage})
 
   defp add_context(event, nil), do: event
   defp add_context(event, context), do: Map.put(event, :context, context)
+
+  defp add_user(event, nil), do: event
+  defp add_user(event, user), do: Map.put(event, :user, user)
 
   defp add_metadata(event, nil), do: event
   defp add_metadata(event, metadata), do: Map.put(event, :metaData, metadata)
@@ -62,23 +61,30 @@ defmodule Bugsnag.Payload do
         %{
           file: "unknown",
           lineNumber: 0,
-          method: "#{ module }.#{ function }#{ format_args(args) }"
+          method: Exception.format_mfa(module, function, args)
         }
       ({ module, function, args, [file: file, line: line_number] }) ->
+        file = to_string file
         %{
-          file: file |> List.to_string,
+          file: file,
           lineNumber: line_number,
-          method: "#{ module }.#{ function }#{ format_args(args) }"
+          inProject: Regex.match?(~r/^(lib|web)/, file),
+          method: Exception.format_mfa(module, function, args),
+          code: get_file_contents(file, line_number)
         }
     end
   end
 
-  defp format_args(args) when is_integer(args) do
-    "/#{args}"
-  end
-  defp format_args(args) when is_list(args) do
-    "(#{args
-        |> Enum.map(&(inspect(&1)))
-        |> Enum.join(", ")})"
+  defp get_file_contents(file, line_number) do
+    file = File.cwd! |> Path.join(file)
+
+    if File.exists?(file) do
+      file
+      |> File.stream!
+      |> Stream.with_index
+      |> Stream.map(fn({line, index}) -> {to_string(index + 1), line} end)
+      |> Enum.slice(if(line_number - 4 > 0, do: line_number - 4, else: 0), 7)
+      |> Enum.into(%{})
+    end
   end
 end
