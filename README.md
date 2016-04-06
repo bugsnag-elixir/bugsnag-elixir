@@ -19,6 +19,9 @@ end
 
 # Open up your config/config.exs (or appropriate project config)
 config :bugsnag, api_key: "bbf085fc54ff99498ebd18ab49a832dd"
+
+# Set the release stage in your environment configs (e.g. config/prod.exs)
+config :bugsnag, release_stage: "prod"
 ```
 
 ## Usage
