@@ -19,11 +19,13 @@ defmodule Bugsnag.Mixfile do
   end
 
   def application do
-    [applications: [:httpoison]]
+    [applications: [:httpoison, :logger]]
   end
 
   defp deps do
     [{:httpoison, "~> 0.6"},
-     {:poison, "~> 1.3"}]
+     {:poison, "~> 1.3"},
+
+     {:meck, "~> 0.8.3", only: :test}]
   end
 end
