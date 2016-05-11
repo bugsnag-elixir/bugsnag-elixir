@@ -18,10 +18,12 @@ defmodule Bugsnag.Payload do
   end
 
   defp add_event(payload, exception, stacktrace, options) do
+    error = Exception.normalize(:error, exception)
+
     event =
       Map.new
       |> add_payload_version
-      |> add_exception(exception, stacktrace)
+      |> add_exception(error, stacktrace)
       |> add_severity(Keyword.get(options, :severity))
       |> add_context(Keyword.get(options, :context))
       |> add_user(Keyword.get(options, :user))
