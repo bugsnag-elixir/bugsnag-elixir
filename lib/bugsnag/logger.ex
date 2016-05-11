@@ -28,7 +28,7 @@ defmodule Bugsnag.Logger do
       end
     rescue
       ex ->
-        error_type = Error.normalize(:error, ex).__struct__
+        error_type = Exception.normalize(:error, ex).__struct__
                       |> Atom.to_string
                       |> String.replace(~r{\AElixir\.}, "")
 
