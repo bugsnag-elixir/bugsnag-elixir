@@ -4,6 +4,7 @@ defmodule Bugsnag.Payload do
     version: Bugsnag.Mixfile.project[:version],
     url: Bugsnag.Mixfile.project[:package][:links][:github],
   }
+  @release_stage Application.get_env(:bugsnag, :release_stage) || "test"
 
   defstruct api_key: nil, notifier: @notifier_info, events: nil
 
@@ -28,7 +29,7 @@ defmodule Bugsnag.Payload do
       |> add_context(Keyword.get(options, :context))
       |> add_user(Keyword.get(options, :user))
       |> add_metadata(Keyword.get(options, :metadata))
-      |> add_release_stage(Keyword.get(options, :release_stage, to_string Mix.env))
+      |> add_release_stage(Keyword.get(options, :release_stage, @release_stage))
 
     Map.put payload, :events, [event]
   end
