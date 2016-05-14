@@ -1,4 +1,4 @@
-# Bugsnag Elixir
+# Bugsnag Elixir [![Build Status](https://travis-ci.org/jarednorman/bugsnag-elixir.svg?branch=master)](https://travis-ci.org/jarednorman/bugsnag-elixir)
 
 Capture exceptions and send them to the [Bugsnag](http://bugsnag.com) API!
 
