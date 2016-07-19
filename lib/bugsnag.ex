@@ -6,7 +6,7 @@ defmodule Bugsnag do
   @notify_url "https://notify.bugsnag.com"
   @request_headers [{"Content-Type", "application/json"}]
 
-  def start do
+  def start(_type, _args) do
     config = Keyword.merge default_config, Application.get_all_env(:bugsnag)
 
     if config[:use_logger] do
