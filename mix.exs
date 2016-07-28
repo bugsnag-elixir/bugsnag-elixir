@@ -13,7 +13,7 @@ defmodule Bugsnag.Mixfile do
   end
 
   def package do
-    [contributors: ["Jared Norman"],
+    [contributors: ["Jared Norman", "Andrew Harvey"],
      licenses: ["MIT"],
      links: %{github: "https://github.com/jarednorman/bugsnag-elixir"}]
   end
