@@ -3,7 +3,7 @@ defmodule Bugsnag.Mixfile do
 
   def project do
     [app: :bugsnag,
-     version: "1.3.1",
+     version: "1.3.2",
      elixir: "~> 1.0",
      package: package,
      description: """
@@ -14,6 +14,7 @@ defmodule Bugsnag.Mixfile do
 
   def package do
     [contributors: ["Jared Norman", "Andrew Harvey"],
+     maintainers: ["Andrew Harvey"],
      licenses: ["MIT"],
      links: %{github: "https://github.com/jarednorman/bugsnag-elixir"}]
   end
