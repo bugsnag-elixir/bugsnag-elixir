@@ -1,8 +1,12 @@
 defmodule BugsnagTest do
   use ExUnit.Case
 
+  import ExUnit.CaptureLog
+
   test "it doesn't raise errors if you report garbage" do
-    Bugsnag.report(Enum, %{ignore: :this_error_in_test})
+    capture_log fn ->
+      Bugsnag.report(Enum, %{ignore: :this_error_in_test})
+    end
   end
 
   test "it handles real errors" do
