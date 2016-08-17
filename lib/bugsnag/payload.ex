@@ -9,13 +9,11 @@ defmodule Bugsnag.Payload do
 
   def new(exception, stacktrace, options) do
     %__MODULE__{}
-    |> add_api_key
+    |> add_api_key(Keyword.get(options, :api_key, Application.get_env(:bugsnag, :api_key, "FAKEKEY")))
     |> add_event(exception, stacktrace, options)
   end
 
-  defp add_api_key(payload) do
-    Map.put payload, :apiKey, Application.get_env(:bugsnag, :api_key)
-  end
+  defp add_api_key(payload, key), do: Map.put payload, :apiKey, key
 
   defp add_event(payload, exception, stacktrace, options) do
     error = Exception.normalize(:error, exception)
