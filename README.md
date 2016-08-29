@@ -32,3 +32,24 @@ rescue
   exception -> Bugsnag.report(exception)
 end
 ```
+
+### Options
+
+These are optional fields to fill the bugsnag report with more information, depending on your specific usage scenario.
+They can be passed into the `Bugsnag.report/2` function like so:
+
+```elixir
+# ...an exception occured
+  Bugsnag.report(exception, severity: "warn", user: %{name: "Jane Doe"})
+```
+
+- `stacktrace` - Allows explicitly passing in a stacktrace used to generate the stacktrace object that is sent to bugsnag
+- `severity` - Sets the severity explicitly to "error", "warning" or "info"
+- `release_stage` - Explicitly sets an arbitrary release stage e.g. "development", "test" or "production"
+- `context` - Allows passing in context information, like e.g. the name of the file the crash occured in
+- `user` - Allows passing in user information, needs to be a map with one or more of the following fields (which are then searchable):
+  - `id` - Any binary identifier for the user
+  - `name` - Full name of the user
+  - `email` - Full email of the user
+- `os_version` and `hostname` - Will be aggregated within Bugsnag's `device` field and can be used as a filter
+- `metadata` - Arbitrary metadata (See [Bugsnag docs](https://docs.bugsnag.com/api/error-reporting/#json-payload) for more information)
