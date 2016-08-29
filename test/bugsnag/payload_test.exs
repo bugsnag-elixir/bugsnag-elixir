@@ -97,8 +97,14 @@ defmodule Bugsnag.PayloadTest do
     assert "2" == get_event.payloadVersion
   end
 
-  test "it sets the API key" do
-    assert Application.get_env(:bugsnag, :api_key) == get_payload.apiKey
+  test "it sets the API key if configured" do
+    Application.put_env(:bugsnag, :api_key, "testkey")
+    assert "testkey" == get_payload.apiKey
+  end
+
+  test "it sets the API key from options, even when configured" do
+    Application.put_env(:bugsnag, :api_key, "testkey")
+    assert "anotherkey" == get_payload(api_key: "anotherkey").apiKey
   end
 
   test "is sets the device info if given" do

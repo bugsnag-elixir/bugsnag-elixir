@@ -45,6 +45,7 @@ They can be passed into the `Bugsnag.report/2` function like so:
   Bugsnag.report(exception, severity: "warn", user: %{name: "Jane Doe"})
 ```
 
+- `api_key` - Allows overriding any configured api key manually
 - `stacktrace` - Allows explicitly passing in a stacktrace used to generate the stacktrace object that is sent to bugsnag
 - `severity` - Sets the severity explicitly to "error", "warning" or "info"
 - `release_stage` - Explicitly sets an arbitrary release stage e.g. "development", "test" or "production"
