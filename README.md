@@ -24,6 +24,8 @@ config :bugsnag, release_stage: "prod"
 
 ## Usage
 
+### Manual reporting
+
 ```elixir
 # Report an exception.
 try do
@@ -53,3 +55,11 @@ They can be passed into the `Bugsnag.report/2` function like so:
   - `email` - Full email of the user
 - `os_version` and `hostname` - Will be aggregated within Bugsnag's `device` field and can be used as a filter
 - `metadata` - Arbitrary metadata (See [Bugsnag docs](https://docs.bugsnag.com/api/error-reporting/#json-payload) for more information)
+
+### Logger
+
+Set the `use_logger` option to true in your application's `config.exs`.
+Then run `Bugsnag.start` and any [SASL](http://www.erlang.org/doc/apps/sasl/error_logging.html)
+compliant processes that crash will send an error report to the `Bugsnag.Logger`.
+The logger will take care of sending the error to Bugsnag.
+
