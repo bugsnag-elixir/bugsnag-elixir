@@ -27,6 +27,7 @@ defmodule Bugsnag.Payload do
       |> add_severity(Keyword.get(options, :severity))
       |> add_context(Keyword.get(options, :context))
       |> add_user(Keyword.get(options, :user))
+      |> add_device(Keyword.get(options, :os_version), Keyword.get(options, :hostname))
       |> add_metadata(Keyword.get(options, :metadata))
       |> add_release_stage(Keyword.get(options, :release_stage, Application.get_env(:bugsnag, :release_stage, "production")))
 
@@ -53,6 +54,17 @@ defmodule Bugsnag.Payload do
 
   defp add_user(event, nil), do: event
   defp add_user(event, user), do: Map.put(event, :user, user)
+
+  defp add_device(event, os_version, hostname) do
+    device =
+      %{}
+      |> Map.merge(if os_version, do: %{osVersion: os_version}, else: %{})
+      |> Map.merge(if hostname, do: %{hostname: hostname}, else: %{})
+
+    if Enum.empty?(device),
+    do:   event,
+    else: Map.put(event, :device, device)
+  end
 
   defp add_metadata(event, nil), do: event
   defp add_metadata(event, metadata), do: Map.put(event, :metaData, metadata)

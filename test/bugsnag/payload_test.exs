@@ -101,6 +101,12 @@ defmodule Bugsnag.PayloadTest do
     assert Application.get_env(:bugsnag, :api_key) == get_payload.apiKey
   end
 
+  test "is sets the device info if given" do
+    evt = get_event(os_version: "some-version 1.0", hostname: "some-host")
+    assert "some-version 1.0" == evt.device.osVersion
+    assert "some-host"        == evt.device.hostname
+  end
+
   test "it reports the notifier" do
     assert %{name: "Bugsnag Elixir",
              url: "https://github.com/jarednorman/bugsnag-elixir",
