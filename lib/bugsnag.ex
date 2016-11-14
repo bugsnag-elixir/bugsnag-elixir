@@ -15,6 +15,7 @@ defmodule Bugsnag do
 
     # put normalized api key to application config
     Application.put_env(:bugsnag, :api_key, config[:api_key])
+    {:ok, self}
   end
 
   def report(exception, options \\ []) do

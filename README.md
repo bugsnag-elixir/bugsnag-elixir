@@ -20,6 +20,9 @@ config :bugsnag, api_key: "bbf085fc54ff99498ebd18ab49a832dd"
 
 # Set the release stage in your environment configs (e.g. config/prod.exs)
 config :bugsnag, release_stage: "prod"
+
+# Set `use_logger: true` to report all uncaught exceptions (using Erlang SASL)
+config :bugsnag, use_logger: true
 ```
 
 ## Usage
@@ -60,7 +63,7 @@ They can be passed into the `Bugsnag.report/2` function like so:
 ### Logger
 
 Set the `use_logger` option to true in your application's `config.exs`.
-Then run `Bugsnag.start` and any [SASL](http://www.erlang.org/doc/apps/sasl/error_logging.html)
+So long as `:bugsnag` is started, any [SASL](http://www.erlang.org/doc/apps/sasl/error_logging.html)
 compliant processes that crash will send an error report to the `Bugsnag.Logger`.
 The logger will take care of sending the error to Bugsnag.
 

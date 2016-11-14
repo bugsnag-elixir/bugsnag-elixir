@@ -20,7 +20,8 @@ defmodule Bugsnag.Mixfile do
   end
 
   def application do
-    [applications: [:httpoison, :logger]]
+    [applications: [:httpoison, :logger],
+     mod: {Bugsnag, []}]
   end
 
   defp deps do
