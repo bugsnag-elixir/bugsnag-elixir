@@ -2,6 +2,10 @@ defmodule Bugsnag.PayloadTest do
   use ExUnit.Case
   alias Bugsnag.Payload
 
+  setup do
+    Application.put_env(:bugsnag, :api_key, "testkey")
+  end
+
   def get_problem do
     try do
       # If the following line is not on line 9 then tests will start failing.
@@ -55,7 +59,7 @@ defmodule Bugsnag.PayloadTest do
 
   test "it generates correct stacktraces when the current file was a script" do
     assert [%{file: "unknown", lineNumber: 0, method: _},
-            %{file: "test/bugsnag/payload_test.exs", lineNumber: 9, method: "Bugsnag.PayloadTest.get_problem/0"},
+            %{file: "test/bugsnag/payload_test.exs", lineNumber: 13, method: "Bugsnag.PayloadTest.get_problem/0"},
             %{file: "test/bugsnag/payload_test.exs", lineNumber: _, method: _} | _] = get_exception.stacktrace
   end
 
@@ -98,13 +102,17 @@ defmodule Bugsnag.PayloadTest do
   end
 
   test "it sets the API key if configured" do
-    Application.put_env(:bugsnag, :api_key, "testkey")
     assert "testkey" == get_payload.apiKey
   end
 
   test "it sets the API key from options, even when configured" do
-    Application.put_env(:bugsnag, :api_key, "testkey")
     assert "anotherkey" == get_payload(api_key: "anotherkey").apiKey
+  end
+
+  test "it raises an error when API key is not configured or passed from options" do
+    Application.delete_env(:bugsnag, :api_key)
+
+    assert_raise RuntimeError, "Need to configure or pass an API KEY", fn -> get_payload() end
   end
 
   test "is sets the device info if given" do
