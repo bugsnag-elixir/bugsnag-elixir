@@ -1,5 +1,6 @@
 defmodule Bugsnag do
   use Application
+  import Supervisor.Spec
 
   alias Bugsnag.Payload
 
@@ -15,18 +16,32 @@ defmodule Bugsnag do
 
     # put normalized api key to application config
     Application.put_env(:bugsnag, :api_key, config[:api_key])
-    {:ok, self}
+
+    children = [
+      supervisor(Task.Supervisor, [[name: Bugsnag.TaskSupervisor, restart: :transient]])
+    ]
+
+    opts = [strategy: :one_for_one, name: Bugsnag.Supervisor]
+    Supervisor.start_link(children, opts)
   end
 
   def report(exception, options \\ []) do
+    Task.Supervisor.start_child(
+      Bugsnag.TaskSupervisor,
+      __MODULE__,
+      :send_report,
+      [exception, options]
+    )
+  end
+
+  def send_report(exception, options \\ []) do
     stacktrace = options[:stacktrace] || System.stacktrace
 
-    spawn fn ->
-      Payload.new(exception, stacktrace, options)
-        |> to_json
-        |> send_notification
-    end
+    Payload.new(exception, stacktrace, options)
+    |> to_json
+    |> send_notification
   end
+
 
   def to_json(payload) do
     payload |> Poison.encode!
