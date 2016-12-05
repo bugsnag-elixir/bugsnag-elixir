@@ -56,6 +56,13 @@ rescue
 end
 ```
 
+In some cases you might want to send the report synchronously, to make sure that it got sent. You can do that with:
+
+```elixir
+# ...an exception occured
+  Bugsnag.sync_report(exception)
+```
+
 ### Options
 
 These are optional fields to fill the bugsnag report with more information, depending on your specific usage scenario.

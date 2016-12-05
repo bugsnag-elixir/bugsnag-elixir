@@ -34,21 +34,32 @@ defmodule Bugsnag do
     Supervisor.start_link(children, opts)
   end
 
+  @doc """
+  Report the exception without waiting for the result of the Bugsnag API call.
+  (I.e. this might fail silently)
+  """
   def report(exception, options \\ []) do
     Task.Supervisor.start_child(
       Bugsnag.TaskSupervisor,
       __MODULE__,
-      :send_report,
+      :sync_report,
       [exception, options]
     )
   end
 
-  def send_report(exception, options \\ []) do
+  @doc "Report the exception and wait for the result. Returns `ok` or `{:error, reason}`."
+  def sync_report(exception, options \\ []) do
     stacktrace = options[:stacktrace] || System.stacktrace
 
     Payload.new(exception, stacktrace, options)
     |> to_json
     |> send_notification
+    |> case do
+      {:ok, %{status_code: 200}}   -> :ok
+      {:ok, %{status_code: other}} -> {:error, "status_#{other}"}
+      {:error, %{reason: reason}}  -> {:error, reason}
+      _                            -> {:error, :unknown}
+    end
   end
 
 
@@ -57,7 +68,7 @@ defmodule Bugsnag do
   end
 
   defp send_notification(body) do
-    HTTPoison.post @notify_url, body, @request_headers
+    HTTPoison.post(@notify_url, body, @request_headers)
   end
 
   defp default_config do

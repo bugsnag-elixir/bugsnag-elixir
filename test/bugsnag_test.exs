@@ -9,6 +9,10 @@ defmodule BugsnagTest do
     end
   end
 
+  test "it returns proper results if you use sync_report" do
+    assert :ok = Bugsnag.sync_report(RuntimeError.exception("some_error"))
+  end
+
   test "it handles real errors" do
     try do
       :foo = :bar
