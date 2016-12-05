@@ -27,6 +27,24 @@ config :bugsnag, use_logger: true
 
 ## Usage
 
+### Configuration
+
+You can use environment variables in order to set up all options. You can set default variable names, and don't touch config files, eg:
+
+- `BUGSNAG_API_KEY`
+- `BUGSNAG_USE_LOGGER`
+- `BUGSNAG_RELEASE_STAGE`
+
+Or you can define from which env vars it should be loaded, eg:
+
+```elixir
+config :bugsnag, :api_key,        {:system, "YOUR_ENV_VAR" [, optional_default]}
+config :bugsnag, :release_stage,  {:system, "YOUR_ENV_VAR" [, optional_default]}
+config :bugsnag, :ues_logger,     {:system, "YOUR_ENV_VAR" [, optional_default]}
+```
+
+Ofcourse you can use regular values as in Installation guide.
+
 ### Manual reporting
 
 ```elixir

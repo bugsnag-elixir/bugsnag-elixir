@@ -7,13 +7,19 @@ defmodule Bugsnag.Payload do
 
   defstruct api_key: nil, notifier: @notifier_info, events: nil
 
+  def new(exception, stacktrace, options) when is_map(options) do
+    new(exception, stacktrace, Map.to_list(options))
+  end
+
   def new(exception, stacktrace, options) do
     %__MODULE__{}
-    |> add_api_key(Keyword.get(options, :api_key, Application.get_env(:bugsnag, :api_key, "FAKEKEY")))
+    |> Map.put(:apiKey, fetch_option(options, :api_key))
     |> add_event(exception, stacktrace, options)
   end
 
-  defp add_api_key(payload, key), do: Map.put payload, :apiKey, key
+  defp fetch_option(options, key, default \\ "development") do
+    Keyword.get options, key, Application.get_env(:bugsnag, key, default)
+  end
 
   defp add_event(payload, exception, stacktrace, options) do
     error = Exception.normalize(:error, exception)
@@ -27,7 +33,7 @@ defmodule Bugsnag.Payload do
       |> add_user(Keyword.get(options, :user))
       |> add_device(Keyword.get(options, :os_version), Keyword.get(options, :hostname))
       |> add_metadata(Keyword.get(options, :metadata))
-      |> add_release_stage(Keyword.get(options, :release_stage, Application.get_env(:bugsnag, :release_stage, "production")))
+      |> add_release_stage(fetch_option(options, :release_stage, "production"))
 
     Map.put payload, :events, [event]
   end

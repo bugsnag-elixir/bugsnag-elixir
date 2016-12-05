@@ -87,10 +87,10 @@ defmodule Bugsnag.PayloadTest do
   end
 
   test "it reports the release stage" do
-    assert "production" == get_event.app.releaseStage
-    assert "staging"    == get_event(release_stage: "staging").app.releaseStage
-    assert "qa"         == get_event(release_stage: "qa").app.releaseStage
-    assert ""           == get_event(release_stage: "").app.releaseStage
+    assert "test"    == get_event.app.releaseStage
+    assert "staging" == get_event(release_stage: "staging").app.releaseStage
+    assert "qa"      == get_event(release_stage: "qa").app.releaseStage
+    assert ""        == get_event(release_stage: "").app.releaseStage
   end
 
   test "it reports the payload version" do
@@ -98,12 +98,10 @@ defmodule Bugsnag.PayloadTest do
   end
 
   test "it sets the API key if configured" do
-    Application.put_env(:bugsnag, :api_key, "testkey")
-    assert "testkey" == get_payload.apiKey
+    assert "FAKEKEY" == get_payload.apiKey
   end
 
   test "it sets the API key from options, even when configured" do
-    Application.put_env(:bugsnag, :api_key, "testkey")
     assert "anotherkey" == get_payload(api_key: "anotherkey").apiKey
   end
 
