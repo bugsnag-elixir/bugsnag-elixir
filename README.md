@@ -20,9 +20,30 @@ config :bugsnag, api_key: "bbf085fc54ff99498ebd18ab49a832dd"
 
 # Set the release stage in your environment configs (e.g. config/prod.exs)
 config :bugsnag, release_stage: "prod"
+
+# Set `use_logger: true` to report all uncaught exceptions (using Erlang SASL)
+config :bugsnag, use_logger: true
 ```
 
 ## Usage
+
+### Configuration
+
+You can use environment variables in order to set up all options. You can set default variable names, and don't touch config files, eg:
+
+- `BUGSNAG_API_KEY`
+- `BUGSNAG_USE_LOGGER`
+- `BUGSNAG_RELEASE_STAGE`
+
+Or you can define from which env vars it should be loaded, eg:
+
+```elixir
+config :bugsnag, :api_key,        {:system, "YOUR_ENV_VAR" [, optional_default]}
+config :bugsnag, :release_stage,  {:system, "YOUR_ENV_VAR" [, optional_default]}
+config :bugsnag, :ues_logger,     {:system, "YOUR_ENV_VAR" [, optional_default]}
+```
+
+Ofcourse you can use regular values as in Installation guide.
 
 ### Manual reporting
 
@@ -33,6 +54,13 @@ try do
 rescue
   exception -> Bugsnag.report(exception)
 end
+```
+
+In some cases you might want to send the report synchronously, to make sure that it got sent. You can do that with:
+
+```elixir
+# ...an exception occured
+  Bugsnag.sync_report(exception)
 ```
 
 ### Options
@@ -60,7 +88,7 @@ They can be passed into the `Bugsnag.report/2` function like so:
 ### Logger
 
 Set the `use_logger` option to true in your application's `config.exs`.
-Then run `Bugsnag.start` and any [SASL](http://www.erlang.org/doc/apps/sasl/error_logging.html)
+So long as `:bugsnag` is started, any [SASL](http://www.erlang.org/doc/apps/sasl/error_logging.html)
 compliant processes that crash will send an error report to the `Bugsnag.Logger`.
 The logger will take care of sending the error to Bugsnag.
 
