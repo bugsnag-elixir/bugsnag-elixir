@@ -47,9 +47,10 @@ defmodule Bugsnag do
     )
   end
 
-  defp add_stacktrace(options) do
+  defp add_stacktrace(options) when is_list(options) do
     Keyword.put_new(options, :stacktrace, System.stacktrace)
   end
+  defp add_stacktrace(options), do: options
 
   @doc "Report the exception and wait for the result. Returns `ok` or `{:error, reason}`."
   def sync_report(exception, options \\ []) do
