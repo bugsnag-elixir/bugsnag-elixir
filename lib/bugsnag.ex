@@ -43,8 +43,12 @@ defmodule Bugsnag do
       Bugsnag.TaskSupervisor,
       __MODULE__,
       :sync_report,
-      [exception, options]
+      [exception, add_stacktrace(options)]
     )
+  end
+
+  defp add_stacktrace(options) do
+    Keyword.put_new(options, :stacktrace, System.stacktrace)
   end
 
   @doc "Report the exception and wait for the result. Returns `ok` or `{:error, reason}`."
