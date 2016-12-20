@@ -3,7 +3,7 @@ defmodule Bugsnag.Mixfile do
 
   def project do
     [app: :bugsnag,
-     version: "1.4.0-beta2",
+     version: "1.4.0-beta3",
      elixir: "~> 1.0",
      package: package,
      description: """
