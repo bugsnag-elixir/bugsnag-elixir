@@ -30,5 +30,14 @@ defmodule BugsnagTest do
     assert Application.get_env(:bugsnag, :release_stage) == "test"
     assert Application.get_env(:bugsnag, :api_key) == "FAKEKEY"
     assert Application.get_env(:bugsnag, :use_logger) == true
+
+  end
+
+  test "it should not explode with logger unset" do
+    Application.put_env(:bugsnag, :use_logger, nil)
+    on_exit fn -> Application.delete_env(:bugsnag, :user_logger) end
+
+    Bugsnag.start(:temporary, %{})
+    assert Application.get_env(:bugsnag, :use_logger) == nil
   end
 end

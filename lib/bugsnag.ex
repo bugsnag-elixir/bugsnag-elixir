@@ -12,8 +12,8 @@ defmodule Bugsnag do
     |> Keyword.merge(Application.get_all_env(:bugsnag))
     |> Enum.map(fn {k, v} -> {k, eval_config(v)} end)
 
-    case config[:use_logger] |> to_string do
-      "true" -> :error_logger.add_report_handler(Bugsnag.Logger)
+    if (config[:use_logger] |> to_string) == "true" do
+      :error_logger.add_report_handler(Bugsnag.Logger)
     end
 
     # Update Application config with evaluated configuration
