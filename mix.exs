@@ -5,11 +5,11 @@ defmodule Bugsnag.Mixfile do
     [app: :bugsnag,
      version: "1.4.0-beta3",
      elixir: "~> 1.0",
-     package: package,
+     package: package(),
      description: """
        An Elixir interface to the Bugsnag API
      """,
-     deps: deps]
+     deps: deps()]
   end
 
   def package do
