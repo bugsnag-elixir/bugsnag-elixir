@@ -6,3 +6,9 @@ elixir:
 otp_release:
     - 18.2.1
     - 19.2
+
+matrix:
+  # Elixir 1.2.x is not compatible with Erlang R19
+  exlcude:
+    - elixir: 1.2.2
+      otp_release: 19.2
