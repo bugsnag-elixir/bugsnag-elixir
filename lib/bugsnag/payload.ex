@@ -4,18 +4,21 @@ defmodule Bugsnag.Payload do
     version: Bugsnag.Mixfile.project[:version],
     url: Bugsnag.Mixfile.project[:package][:links][:github],
   }
-  @release_stage Application.get_env(:bugsnag, :release_stage) || "test"
 
   defstruct api_key: nil, notifier: @notifier_info, events: nil
 
+  def new(exception, stacktrace, options) when is_map(options) do
+    new(exception, stacktrace, Map.to_list(options))
+  end
+
   def new(exception, stacktrace, options) do
     %__MODULE__{}
-    |> add_api_key
+    |> Map.put(:apiKey, fetch_option(options, :api_key))
     |> add_event(exception, stacktrace, options)
   end
 
-  defp add_api_key(payload) do
-    Map.put payload, :apiKey, Application.get_env(:bugsnag, :api_key)
+  defp fetch_option(options, key, default \\ "development") do
+    Keyword.get options, key, Application.get_env(:bugsnag, key, default)
   end
 
   defp add_event(payload, exception, stacktrace, options) do
@@ -28,8 +31,9 @@ defmodule Bugsnag.Payload do
       |> add_severity(Keyword.get(options, :severity))
       |> add_context(Keyword.get(options, :context))
       |> add_user(Keyword.get(options, :user))
+      |> add_device(Keyword.get(options, :os_version), Keyword.get(options, :hostname))
       |> add_metadata(Keyword.get(options, :metadata))
-      |> add_release_stage(Keyword.get(options, :release_stage, @release_stage))
+      |> add_release_stage(fetch_option(options, :release_stage, "production"))
 
     Map.put payload, :events, [event]
   end
@@ -54,6 +58,17 @@ defmodule Bugsnag.Payload do
 
   defp add_user(event, nil), do: event
   defp add_user(event, user), do: Map.put(event, :user, user)
+
+  defp add_device(event, os_version, hostname) do
+    device =
+      %{}
+      |> Map.merge(if os_version, do: %{osVersion: os_version}, else: %{})
+      |> Map.merge(if hostname, do: %{hostname: hostname}, else: %{})
+
+    if Enum.empty?(device),
+    do:   event,
+    else: Map.put(event, :device, device)
+  end
 
   defp add_metadata(event, nil), do: event
   defp add_metadata(event, metadata), do: Map.put(event, :metaData, metadata)

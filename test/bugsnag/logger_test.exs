@@ -93,7 +93,9 @@ defmodule Bugsnag.LoggerTest do
       :timer.sleep 250
     end
 
-    assert log_msg =~ "(stop) bad cast: :fail"
+    # We assert either of these log messages because the log changed between elixir
+    # versions. It feels like we shouldn't need to assert on the log message but...
+    assert log_msg =~ "(stop) bad cast: :fail" || log_msg =~ "but no handle_cast"
     assert :meck.called(HTTP, :post, [:_, :_, :_])
 
     :meck.unload(HTTP)
