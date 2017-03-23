@@ -61,6 +61,7 @@ defmodule Bugsnag do
     |> send_notification
     |> case do
       {:ok, %{status_code: 200}}   -> :ok
+      {:ok, %{reason: 'not_sent'}} -> {:ok, :not_sent}
       {:ok, %{status_code: other}} -> {:error, "status_#{other}"}
       {:error, %{reason: reason}}  -> {:error, reason}
       _                            -> {:error, :unknown}
@@ -73,14 +74,22 @@ defmodule Bugsnag do
   end
 
   defp send_notification(body) do
-    HTTPoison.post(@notify_url, body, @request_headers)
+    release_stage = Application.get_env(:bugsnag, :release_stage)
+    notify_release_stages = Application.get_env(:bugsnag, :notify_release_stages)
+
+    if (release_stage && length(notify_release_stages) && Enum.member?(notify_release_stages, release_stage)) do
+      HTTPoison.post(@notify_url, body, @request_headers)
+    else
+      {:ok, %{reason: 'not_sent'}}
+    end
   end
 
   defp default_config do
     [
       api_key:       {:system, "BUGSNAG_API_KEY", "FAKEKEY"},
       use_logger:    {:system, "BUGSNAG_USE_LOGGER", true},
-      release_stage: {:system, "BUGSNAG_RELEASE_STAGE", "test"}
+      release_stage: {:system, "BUGSNAG_RELEASE_STAGE", "test"},
+      notify_release_stages: {:system, "BUGSNAG_NOTIFY_RELEASE_STAGES", ["production"]}
     ]
   end
 
