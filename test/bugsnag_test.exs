@@ -31,8 +31,7 @@ defmodule BugsnagTest do
 
   test "it properly sets config" do
     Bugsnag.start(:ok, :ok)
-
-    assert Application.get_env(:bugsnag, :release_stage) == "test"
+    assert Application.get_env(:bugsnag, :release_stage) == "production"
     assert Application.get_env(:bugsnag, :api_key) == "FAKEKEY"
     assert Application.get_env(:bugsnag, :use_logger) == true
     assert Application.get_env(:bugsnag, :notify_release_stages) == ["production"]
