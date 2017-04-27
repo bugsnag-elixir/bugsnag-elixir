@@ -40,7 +40,7 @@ Or you can define from which env vars it should be loaded, eg:
 ```elixir
 config :bugsnag, :api_key,        {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :release_stage,  {:system, "YOUR_ENV_VAR" [, optional_default]}
-config :bugsnag, :ues_logger,     {:system, "YOUR_ENV_VAR" [, optional_default]}
+config :bugsnag, :use_logger,     {:system, "YOUR_ENV_VAR" [, optional_default]}
 ```
 
 Ofcourse you can use regular values as in Installation guide.
