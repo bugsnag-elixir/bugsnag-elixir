@@ -87,10 +87,17 @@ defmodule Bugsnag.PayloadTest do
   end
 
   test "it reports the release stage" do
-    assert "test"    == get_event().app.releaseStage
-    assert "staging" == get_event(release_stage: "staging").app.releaseStage
-    assert "qa"      == get_event(release_stage: "qa").app.releaseStage
-    assert ""        == get_event(release_stage: "").app.releaseStage
+    assert "production" == get_event().app.releaseStage
+    assert "staging"    == get_event(release_stage: "staging").app.releaseStage
+    assert "qa"         == get_event(release_stage: "qa").app.releaseStage
+    assert ""           == get_event(release_stage: "").app.releaseStage
+  end
+
+  test "it reports the notify release stages" do
+    assert ["production"] == get_event().notifyReleaseStages
+    assert ["staging"]    == get_event(notify_release_stages: ["staging"]).notifyReleaseStages
+    assert ["qa"]         == get_event(notify_release_stages: ["qa"]).notifyReleaseStages
+    assert [""]           == get_event(notify_release_stages: [""]).notifyReleaseStages
   end
 
   test "it reports the payload version" do

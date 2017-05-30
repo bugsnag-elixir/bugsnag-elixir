@@ -11,6 +11,12 @@ defmodule Bugsnag.LoggerTest do
     on_exit fn ->
       :error_logger.delete_report_handler(Bugsnag.Logger)
     end
+
+    Application.put_env(:bugsnag, :release_stage, "test")
+    Application.put_env(:bugsnag, :notify_release_stages, ["test"])
+
+    on_exit fn -> Application.delete_env(:bugsnag, :release_stage) end
+    on_exit fn -> Application.delete_env(:bugsnag, :notify_release_stages) end
   end
 
   test "logging a crash" do
