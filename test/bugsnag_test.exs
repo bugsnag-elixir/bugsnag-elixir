@@ -10,8 +10,9 @@ defmodule BugsnagTest do
   end
 
   test "it returns proper results if you use sync_report" do
+    old_release_stage = Application.get_env(:bugsnag, :release_stage)
     Application.put_env(:bugsnag, :release_stage, "production")
-    on_exit fn -> Application.delete_env(:bugsnag, :release_stage) end
+    on_exit fn -> Application.put_env(:bugsnag, :release_stage, old_release_stage) end
 
     assert :ok = Bugsnag.sync_report(RuntimeError.exception("some_error"))
   end
