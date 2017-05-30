@@ -7,7 +7,7 @@ Capture exceptions and send them to the [Bugsnag](http://bugsnag.com) API!
 ```elixir
 # Add it to your deps in your projects mix.exs
 defp deps do
-  [{:bugsnag, "~> 1.4.0"}]
+  [{:bugsnag, "~> 1.5.0"}]
 end
 
 # Now, list the :bugsnag application as your application dependency:
