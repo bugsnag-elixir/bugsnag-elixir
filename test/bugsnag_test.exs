@@ -46,8 +46,9 @@ defmodule BugsnagTest do
   end
 
   test "does not notify bugsnag if you use sync_report and release_stage is not included in the notify_release_stages" do
+    old_release_stage = Application.get_env(:bugsnag, :release_stage)
     Application.put_env(:bugsnag, :release_stage, "development")
-    on_exit fn -> Application.delete_env(:bugsnag, :release_stage) end
+    on_exit fn -> Application.put_env(:bugsnag, :release_stage, old_release_stage) end
 
     refute Enum.member?(Application.get_env(:bugsnag, :notify_release_stages), "development")
     assert {:ok, :not_sent} = Bugsnag.sync_report(RuntimeError.exception("some_error"))
