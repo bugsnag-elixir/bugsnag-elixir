@@ -84,7 +84,7 @@ defmodule Bugsnag do
   def should_notify do
     release_stage = Application.get_env(:bugsnag, :release_stage)
     notify_release_stages = Application.get_env(:bugsnag, :notify_release_stages)
-    release_stage && length(notify_release_stages) && Enum.member?(notify_release_stages, release_stage)
+    release_stage && is_list(notify_release_stages) && Enum.member?(notify_release_stages, release_stage)
   end
 
   defp default_config do
