@@ -13,11 +13,11 @@ defmodule Bugsnag.Payload do
 
   def new(exception, stacktrace, options) do
     %__MODULE__{}
-    |> Map.put(:apiKey, fetch_option(options, :api_key))
+    |> Map.put(:apiKey, fetch_option(options, :api_key, "development"))
     |> add_event(exception, stacktrace, options)
   end
 
-  defp fetch_option(options, key, default \\ "development") do
+  defp fetch_option(options, key, default \\ nil) do
     Keyword.get options, key, Application.get_env(:bugsnag, key, default)
   end
 
@@ -33,8 +33,10 @@ defmodule Bugsnag.Payload do
       |> add_user(Keyword.get(options, :user))
       |> add_device(Keyword.get(options, :os_version), Keyword.get(options, :hostname))
       |> add_metadata(Keyword.get(options, :metadata))
-      |> add_release_stage(fetch_option(options, :release_stage, "production"))
       |> add_notify_release_stages(fetch_option(options, :notify_release_stages, ["production"]))
+      |> add_release_stage(fetch_option(options, :release_stage, "production"))
+      |> add_app_type(fetch_option(options, :app_type, "elixir"))
+      |> add_app_version(fetch_option(options, :app_version))
 
     Map.put payload, :events, [event]
   end
@@ -52,8 +54,26 @@ defmodule Bugsnag.Payload do
   defp add_severity(event, severity) when severity in ~w(error warning info), do: Map.put(event, :severity, severity)
   defp add_severity(event, _), do: Map.put(event, :severity, "error")
 
-  defp add_release_stage(event, release_stage), do: Map.put(event, :app, %{releaseStage: release_stage})
   defp add_notify_release_stages(event, notify_release_stages), do: Map.put(event, :notifyReleaseStages, notify_release_stages)
+
+  defp add_release_stage(event, release_stage) do
+    event
+    |> Map.put_new(:app, %{})
+    |> put_in([:app, :releaseStage], release_stage)
+  end
+
+  defp add_app_type(event, type) do
+    event
+    |> Map.put_new(:app, %{})
+    |> put_in([:app, :type], type)
+  end
+
+  defp add_app_version(event, nil), do: event
+  defp add_app_version(event, version) do
+    event
+    |> Map.put_new(:app, %{})
+    |> put_in([:app, :version], version)
+  end
 
   defp add_context(event, nil), do: event
   defp add_context(event, context), do: Map.put(event, :context, context)

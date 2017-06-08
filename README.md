@@ -83,6 +83,8 @@ They can be passed into the `Bugsnag.report/2` function like so:
 - `severity` - Sets the severity explicitly to "error", "warning" or "info"
 - `release_stage` - Explicitly sets an arbitrary release stage e.g. "development", "test" or "production"
 - `notify_release_stages` - States in which environments, bugnsnag will report errors e.g. "development", "test" or "production"
+- `app_type` - Sets the type of application, e.g "elixir" or "phoenix"
+- `app_version` - Allows to track in which version of your application the error occurred, e.g. `MyApp.Mixfile.project[:version]`
 - `context` - Allows passing in context information, like e.g. the name of the file the crash occured in
 - `user` - Allows passing in user information, needs to be a map with one or more of the following fields (which are then searchable):
   - `id` - Any binary identifier for the user
