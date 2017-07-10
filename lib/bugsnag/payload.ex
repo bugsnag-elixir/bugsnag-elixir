@@ -30,6 +30,7 @@ defmodule Bugsnag.Payload do
       |> add_exception(error, stacktrace)
       |> add_severity(Keyword.get(options, :severity))
       |> add_context(Keyword.get(options, :context))
+      |> add_custom_grouping_hash(Keyword.get(options, :custom_grouping_hash))
       |> add_user(Keyword.get(options, :user))
       |> add_device(Keyword.get(options, :os_version), Keyword.get(options, :hostname))
       |> add_metadata(Keyword.get(options, :metadata))
@@ -60,6 +61,9 @@ defmodule Bugsnag.Payload do
 
   defp add_user(event, nil), do: event
   defp add_user(event, user), do: Map.put(event, :user, user)
+
+  defp add_custom_grouping_hash(event, nil), do: event
+  defp add_custom_grouping_hash(event, custom_grouping_hash), do: Map.put(event, :groupingHash, custom_grouping_hash)
 
   defp add_device(event, os_version, hostname) do
     device =
