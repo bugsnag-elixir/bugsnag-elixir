@@ -84,6 +84,7 @@ They can be passed into the `Bugsnag.report/2` function like so:
 - `release_stage` - Explicitly sets an arbitrary release stage e.g. "development", "test" or "production"
 - `notify_release_stages` - States in which environments, bugnsnag will report errors e.g. "development", "test" or "production"
 - `context` - Allows passing in context information, like e.g. the name of the file the crash occured in
+- `custom_grouping_hash` - Explicitly group with other events sharing the same grouping hash
 - `user` - Allows passing in user information, needs to be a map with one or more of the following fields (which are then searchable):
   - `id` - Any binary identifier for the user
   - `name` - Full name of the user
@@ -97,4 +98,3 @@ Set the `use_logger` option to true in your application's `config.exs`.
 So long as `:bugsnag` is started, any [SASL](http://www.erlang.org/doc/apps/sasl/error_logging.html)
 compliant processes that crash will send an error report to the `Bugsnag.Logger`.
 The logger will take care of sending the error to Bugsnag.
-
