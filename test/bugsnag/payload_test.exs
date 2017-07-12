@@ -39,6 +39,15 @@ defmodule Bugsnag.PayloadTest do
     refute Map.has_key?(get_event(), :metaData)
   end
 
+  test "it adds a custom grouping hash when given" do
+    grouping_hash = "ExampleError Example.example"
+    assert grouping_hash == get_event(custom_grouping_hash: grouping_hash).groupingHash
+  end
+
+  test "groupingHash is nil when not given" do
+    refute Map.has_key?(get_event(), :groupingHash)
+  end
+
   test "it generates correct stacktraces" do
     {exception, stacktrace} =
       try do
