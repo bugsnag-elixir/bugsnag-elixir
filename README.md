@@ -19,10 +19,11 @@ end
 config :bugsnag, api_key: "bbf085fc54ff99498ebd18ab49a832dd"
 
 # Set the release stage in your environment configs (e.g. config/prod.exs)
-config :bugsnag, release_stage: "prod"
+config :bugsnag, release_stage: "production"
 
-# Set the notify release stages to limit reorting the errors based on your environment
-config :bugsnag, notify_release_stages: ["prod"]
+# Set the notify release stages to limit reporting the errors based on your environment
+# Defaults to ["production"]
+config :bugsnag, notify_release_stages: ["production"]
 
 # Set `use_logger: true` to report all uncaught exceptions (using Erlang SASL)
 config :bugsnag, use_logger: true
@@ -82,7 +83,7 @@ They can be passed into the `Bugsnag.report/2` function like so:
 - `stacktrace` - Allows explicitly passing in a stacktrace used to generate the stacktrace object that is sent to bugsnag
 - `severity` - Sets the severity explicitly to "error", "warning" or "info"
 - `release_stage` - Explicitly sets an arbitrary release stage e.g. "development", "test" or "production"
-- `notify_release_stages` - States in which environments, bugnsnag will report errors e.g. "development", "test" or "production"
+- `notify_release_stages` - States in which environments, bugnsnag will report errors e.g. "development", "test" or "production". Defaults to ["production"]
 - `context` - Allows passing in context information, like e.g. the name of the file the crash occured in
 - `user` - Allows passing in user information, needs to be a map with one or more of the following fields (which are then searchable):
   - `id` - Any binary identifier for the user
