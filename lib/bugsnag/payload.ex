@@ -35,6 +35,7 @@ defmodule Bugsnag.Payload do
       |> add_metadata(Keyword.get(options, :metadata))
       |> add_release_stage(fetch_option(options, :release_stage, "production"))
       |> add_notify_release_stages(fetch_option(options, :notify_release_stages, ["production"]))
+      |> add_hostname(fetch_option(options, :hostname))
 
     Map.put payload, :events, [event]
   end
@@ -71,6 +72,9 @@ defmodule Bugsnag.Payload do
     do:   event,
     else: Map.put(event, :device, device)
   end
+
+  defp add_hostname(event, nil), do: event
+  defp add_hostname(event, hostname), do: Map.put(event, :hostname, hostname)
 
   defp add_metadata(event, nil), do: event
   defp add_metadata(event, metadata), do: Map.put(event, :metaData, metadata)
