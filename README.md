@@ -1,11 +1,3 @@
-### Seeking Maintainer
-
-I ([@jarednorman](https://github.com/jarednorman)) am currently not working in
-the Elixir ecosystem and could use a hand with maintaining the project. E-mail
-me at [jared@creepywizard.com](mailto:jared@creepywizard.com) if you're
-interested in helping out during my time away from this lovely language.
-:smiley:
-
 # Bugsnag Elixir [![Build Status](https://travis-ci.org/jarednorman/bugsnag-elixir.svg?branch=master)](https://travis-ci.org/jarednorman/bugsnag-elixir)
 
 Capture exceptions and send them to the [Bugsnag](http://bugsnag.com) API!
