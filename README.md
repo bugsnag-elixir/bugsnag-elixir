@@ -27,6 +27,9 @@ config :bugsnag, notify_release_stages: ["production"]
 
 # Set `use_logger: true` to report all uncaught exceptions (using Erlang SASL)
 config :bugsnag, use_logger: true
+
+# Override the default bugsnag notify url
+config :bugsnag, notify_url: "https://notify.bugsnag.com"
 ```
 
 ## Usage

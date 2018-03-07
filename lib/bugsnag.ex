@@ -83,7 +83,7 @@ defmodule Bugsnag do
   end
 
   defp send_notification(body) do
-    HTTPoison.post(@notify_url, body, @request_headers)
+    HTTPoison.post(notify_url(), body, @request_headers)
   end
 
   def should_notify do
@@ -113,4 +113,8 @@ defmodule Bugsnag do
   end
 
   defp eval_config(value), do: value
+
+  defp notify_url do
+    Application.get_env(:bugsnag, :notify_url, @notify_url)
+  end
 end
