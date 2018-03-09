@@ -1,6 +1,7 @@
 defmodule Bugsnag do
   use Application
   import Supervisor.Spec
+  require Logger
 
   alias Bugsnag.Payload
 
@@ -21,6 +22,10 @@ defmodule Bugsnag do
     # by using GenServer instead of this kind of app.
     Enum.each config, fn {k, v} ->
       Application.put_env :bugsnag, k, v
+    end
+
+    if !config[:api_key] and should_notify() do
+      Logger.warn("Bugsnag api_key is not configured, errors will not be reported")
     end
 
     children = [
@@ -53,29 +58,32 @@ defmodule Bugsnag do
   def sync_report(exception, options \\ []) do
     stacktrace = options[:stacktrace] || System.stacktrace
 
-    Payload.new(exception, stacktrace, options)
-    |> to_json
-    |> send_notification
-    |> case do
-      {:ok, %{status_code: 200}}   -> :ok
-      {:ok, %{reason: 'Release stage is not in notify release stages'}} -> {:ok, :not_sent}
-      {:ok, %{status_code: other}} -> {:error, "status_#{other}"}
-      {:error, %{reason: reason}}  -> {:error, reason}
-      _                            -> {:error, :unknown}
+    if should_notify() do
+      if Application.get_env(:bugsnag, :api_key) do
+        Payload.new(exception, stacktrace, options)
+        |> to_json
+        |> send_notification
+        |> case do
+          {:ok, %{status_code: 200}}   -> :ok
+          {:ok, %{status_code: other}} -> {:error, "status_#{other}"}
+          {:error, %{reason: reason}}  -> {:error, reason}
+          _                            -> {:error, :unknown}
+        end
+      else
+        Logger.warn("Bugsnag api_key is not configured, error not reported")
+        {:error, %{reason: "API key is not configured"}}
+      end
+    else
+      {:ok, :not_sent}
     end
   end
-
 
   def to_json(payload) do
     payload |> Poison.encode!
   end
 
   defp send_notification(body) do
-    if should_notify() do
-      HTTPoison.post(@notify_url, body, @request_headers)
-    else
-      {:ok, %{reason: 'Release stage is not in notify release stages'}}
-    end
+    HTTPoison.post(@notify_url, body, @request_headers)
   end
 
   def should_notify do
@@ -86,7 +94,7 @@ defmodule Bugsnag do
 
   defp default_config do
     [
-      api_key:       {:system, "BUGSNAG_API_KEY", "FAKEKEY"},
+      api_key:       {:system, "BUGSNAG_API_KEY", nil},
       use_logger:    {:system, "BUGSNAG_USE_LOGGER", true},
       release_stage: {:system, "BUGSNAG_RELEASE_STAGE", "production"},
       notify_release_stages: {:system, "BUGSNAG_NOTIFY_RELEASE_STAGES", ["production"]}
