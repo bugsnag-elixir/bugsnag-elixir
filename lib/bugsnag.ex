@@ -23,9 +23,6 @@ defmodule Bugsnag do
       Application.put_env :bugsnag, k, v
     end
 
-    # put normalized api key to application config
-    Application.put_env(:bugsnag, :api_key, config[:api_key])
-
     children = [
       supervisor(Task.Supervisor, [[name: Bugsnag.TaskSupervisor, restart: :transient]])
     ]
