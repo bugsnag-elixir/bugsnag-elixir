@@ -30,8 +30,7 @@ defmodule BugsnagTest do
       "{\"foo\":3,\"bar\":\"baz\"}"
   end
 
-  test "it properly sets config" do
-    Bugsnag.start(:ok, :ok)
+  test "it puts application env values on startup" do
     assert Application.get_env(:bugsnag, :release_stage) == "production"
     assert Application.get_env(:bugsnag, :api_key) == "FAKEKEY"
     assert Application.get_env(:bugsnag, :use_logger) == true
