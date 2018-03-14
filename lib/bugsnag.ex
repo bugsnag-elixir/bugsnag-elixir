@@ -95,7 +95,7 @@ defmodule Bugsnag do
   defp default_config do
     [
       api_key:       {:system, "BUGSNAG_API_KEY", nil},
-      notify_url:    {:system, "BUGSNAG_NOTIFY_URL", @notify_url},
+      endpoint_url:  {:system, "BUGSNAG_ENDPOINT_URL", @notify_url},
       use_logger:    {:system, "BUGSNAG_USE_LOGGER", true},
       release_stage: {:system, "BUGSNAG_RELEASE_STAGE", "production"},
       notify_release_stages: {:system, "BUGSNAG_NOTIFY_RELEASE_STAGES", ["production"]}
@@ -116,6 +116,6 @@ defmodule Bugsnag do
   defp eval_config(value), do: value
 
   defp notify_url do
-    Application.get_env(:bugsnag, :notify_url, @notify_url)
+    Application.get_env(:bugsnag, :endpoint_url, @notify_url)
   end
 end
