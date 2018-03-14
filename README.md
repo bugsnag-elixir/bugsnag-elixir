@@ -27,6 +27,9 @@ config :bugsnag, notify_release_stages: ["production"]
 
 # Set `use_logger: true` to report all uncaught exceptions (using Erlang SASL)
 config :bugsnag, use_logger: true
+
+# Override the default bugsnag endpoint url
+config :bugsnag, endpoint_url: "https://notify.bugsnag.com"
 ```
 
 ## Usage
@@ -36,6 +39,7 @@ config :bugsnag, use_logger: true
 You can use environment variables in order to set up all options. You can set default variable names, and don't touch config files, eg:
 
 - `BUGSNAG_API_KEY`
+- `BUGSNAG_ENDPOINT_URL`
 - `BUGSNAG_USE_LOGGER`
 - `BUGSNAG_RELEASE_STAGE`
 - `BUGSNAG_NOTIFY_RELEASE_STAGES`
@@ -44,6 +48,7 @@ Or you can define from which env vars it should be loaded, eg:
 
 ```elixir
 config :bugsnag, :api_key,        {:system, "YOUR_ENV_VAR" [, optional_default]}
+config :bugsnag, :endpoint_url,   {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :release_stage,  {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :notify_release_stages,  {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :use_logger,     {:system, "YOUR_ENV_VAR" [, optional_default]}
