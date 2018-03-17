@@ -98,7 +98,8 @@ defmodule Bugsnag do
       endpoint_url:  {:system, "BUGSNAG_ENDPOINT_URL", @notify_url},
       use_logger:    {:system, "BUGSNAG_USE_LOGGER", true},
       release_stage: {:system, "BUGSNAG_RELEASE_STAGE", "production"},
-      notify_release_stages: {:system, "BUGSNAG_NOTIFY_RELEASE_STAGES", ["production"]}
+      notify_release_stages: {:system, "BUGSNAG_NOTIFY_RELEASE_STAGES", ["production"]},
+      hostname:      {:system, "HOSTNAME", "unknown"}
     ]
   end
 

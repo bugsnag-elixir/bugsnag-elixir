@@ -43,6 +43,7 @@ You can use environment variables in order to set up all options. You can set de
 - `BUGSNAG_USE_LOGGER`
 - `BUGSNAG_RELEASE_STAGE`
 - `BUGSNAG_NOTIFY_RELEASE_STAGES`
+- `HOSTNAME`
 
 Or you can define from which env vars it should be loaded, eg:
 
@@ -52,6 +53,7 @@ config :bugsnag, :endpoint_url,   {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :release_stage,  {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :notify_release_stages,  {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :use_logger,     {:system, "YOUR_ENV_VAR" [, optional_default]}
+config :bugsnag, :hostname,       {:system, "YOUR_ENV_VAR" [, optional_default]}
 ```
 
 Ofcourse you can use regular values as in Installation guide.
