@@ -8,12 +8,12 @@ defmodule Bugsnag.PayloadTest do
       # You've been warned!
       Harbour.cats(3)
     rescue
-      exception -> [exception, System.stacktrace]
+      exception -> [exception, System.stacktrace()]
     end
   end
 
   def get_payload(options \\ []) do
-    apply Payload, :new, List.insert_at(get_problem(), -1, options)
+    apply(Payload, :new, List.insert_at(get_problem(), -1, options))
   end
 
   def get_event(options \\ []) do
@@ -44,31 +44,51 @@ defmodule Bugsnag.PayloadTest do
       try do
         Enum.join(3, 'million')
       rescue
-        exception -> {exception, System.stacktrace}
+        exception -> {exception, System.stacktrace()}
       end
 
-    %{events: [%{exceptions: [%{stacktrace: stacktrace}]}]} = Payload.new(exception, stacktrace, [])
-    assert [%{file: "lib/enum.ex", lineNumber: _, method: _},
-            %{file: "test/bugsnag/payload_test.exs", lineNumber: _, method: ~s(Bugsnag.PayloadTest."test it generates correct stacktraces"/1)}
-            | _] = stacktrace
+    %{events: [%{exceptions: [%{stacktrace: stacktrace}]}]} =
+      Payload.new(exception, stacktrace, [])
+
+    assert [
+             %{file: "lib/enum.ex", lineNumber: _, method: _},
+             %{
+               file: "test/bugsnag/payload_test.exs",
+               lineNumber: _,
+               method: ~s(Bugsnag.PayloadTest."test it generates correct stacktraces"/1)
+             }
+             | _
+           ] = stacktrace
   end
 
   test "it generates correct stacktraces when the current file was a script" do
-    assert [%{file: "unknown", lineNumber: 0, method: _},
-            %{file: "test/bugsnag/payload_test.exs", lineNumber: 9, method: "Bugsnag.PayloadTest.get_problem/0"},
-            %{file: "test/bugsnag/payload_test.exs", lineNumber: _, method: _} | _] = get_exception().stacktrace
+    assert [
+             %{file: "unknown", lineNumber: 0, method: _},
+             %{
+               file: "test/bugsnag/payload_test.exs",
+               lineNumber: 9,
+               method: "Bugsnag.PayloadTest.get_problem/0"
+             },
+             %{file: "test/bugsnag/payload_test.exs", lineNumber: _, method: _} | _
+           ] = get_exception().stacktrace
   end
 
   # NOTE: Regression test
   test "it generates correct stacktraces when the method arguments are in place of arity" do
-    {exception, stacktrace} = try do
-      Fart.poo(:butts, 1, "foo\n")
-    rescue
-      exception -> {exception, System.stacktrace}
-    end
-    %{events: [%{exceptions: [%{stacktrace: stacktrace}]}]} = Payload.new(exception, stacktrace, [])
-    assert [%{file: "unknown", lineNumber: 0, method: "Fart.poo(:butts, 1, \"foo\\n\")"},
-            %{file: "test/bugsnag/payload_test.exs", lineNumber: _, method: _, code: _} | _] = stacktrace
+    {exception, stacktrace} =
+      try do
+        Fart.poo(:butts, 1, "foo\n")
+      rescue
+        exception -> {exception, System.stacktrace()}
+      end
+
+    %{events: [%{exceptions: [%{stacktrace: stacktrace}]}]} =
+      Payload.new(exception, stacktrace, [])
+
+    assert [
+             %{file: "unknown", lineNumber: 0, method: "Fart.poo(:butts, 1, \"foo\\n\")"},
+             %{file: "test/bugsnag/payload_test.exs", lineNumber: _, method: _, code: _} | _
+           ] = stacktrace
   end
 
   test "it reports the error class" do
@@ -88,16 +108,16 @@ defmodule Bugsnag.PayloadTest do
 
   test "it reports the release stage" do
     assert "production" == get_event().app.releaseStage
-    assert "staging"    == get_event(release_stage: "staging").app.releaseStage
-    assert "qa"         == get_event(release_stage: "qa").app.releaseStage
-    assert ""           == get_event(release_stage: "").app.releaseStage
+    assert "staging" == get_event(release_stage: "staging").app.releaseStage
+    assert "qa" == get_event(release_stage: "qa").app.releaseStage
+    assert "" == get_event(release_stage: "").app.releaseStage
   end
 
   test "it reports the notify release stages" do
     assert ["production"] == get_event().notifyReleaseStages
-    assert ["staging"]    == get_event(notify_release_stages: ["staging"]).notifyReleaseStages
-    assert ["qa"]         == get_event(notify_release_stages: ["qa"]).notifyReleaseStages
-    assert [""]           == get_event(notify_release_stages: [""]).notifyReleaseStages
+    assert ["staging"] == get_event(notify_release_stages: ["staging"]).notifyReleaseStages
+    assert ["qa"] == get_event(notify_release_stages: ["qa"]).notifyReleaseStages
+    assert [""] == get_event(notify_release_stages: [""]).notifyReleaseStages
   end
 
   test "it reports the payload version" do
@@ -115,12 +135,14 @@ defmodule Bugsnag.PayloadTest do
   test "is sets the device info if given" do
     evt = get_event(os_version: "some-version 1.0", hostname: "some-host")
     assert "some-version 1.0" == evt.device.osVersion
-    assert "some-host"        == evt.device.hostname
+    assert "some-host" == evt.device.hostname
   end
 
   test "it reports the notifier" do
-    assert %{name: "Bugsnag Elixir",
+    assert %{
+             name: "Bugsnag Elixir",
              url: "https://github.com/jarednorman/bugsnag-elixir",
-             version: _} = get_payload().notifier
+             version: _
+           } = get_payload().notifier
   end
 end

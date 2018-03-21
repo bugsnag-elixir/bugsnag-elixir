@@ -4,15 +4,15 @@ defmodule BugsnagTest do
   import ExUnit.CaptureLog
 
   test "it doesn't raise errors if you report garbage" do
-    capture_log fn ->
+    capture_log(fn ->
       Bugsnag.report(Enum, %{ignore: :this_error_in_test})
-    end
+    end)
   end
 
   test "it returns proper results if you use sync_report" do
     old_release_stage = Application.get_env(:bugsnag, :release_stage)
     Application.put_env(:bugsnag, :release_stage, "production")
-    on_exit fn -> Application.put_env(:bugsnag, :release_stage, old_release_stage) end
+    on_exit(fn -> Application.put_env(:bugsnag, :release_stage, old_release_stage) end)
 
     assert :ok = Bugsnag.sync_report(RuntimeError.exception("some_error"))
   end
@@ -26,8 +26,7 @@ defmodule BugsnagTest do
   end
 
   test "it can encode json" do
-    assert Bugsnag.to_json(%{foo: 3, bar: "baz"}) ==
-      "{\"foo\":3,\"bar\":\"baz\"}"
+    assert Bugsnag.to_json(%{foo: 3, bar: "baz"}) == "{\"foo\":3,\"bar\":\"baz\"}"
   end
 
   test "it puts application env values on startup" do
@@ -40,7 +39,7 @@ defmodule BugsnagTest do
   test "it warns if no api_key is configured" do
     {:ok, old_key} = Application.fetch_env(:bugsnag, :api_key)
     Application.delete_env(:bugsnag, :api_key)
-    on_exit fn -> Application.put_env(:bugsnag, :api_key, old_key) end
+    on_exit(fn -> Application.put_env(:bugsnag, :api_key, old_key) end)
 
     assert capture_log(fn -> Bugsnag.start(:temporary, %{}) end) =~ "api_key is not configured"
   end
@@ -48,14 +47,14 @@ defmodule BugsnagTest do
   test "it doesn't warn about api_key if the current release stage is not a notifying one" do
     {:ok, old_stage} = Application.fetch_env(:bugsnag, :release_stage)
     Application.put_env(:bugsnag, :release_stage, "development")
-    on_exit fn -> Application.put_env(:bugsnag, :release_stage, old_stage) end
+    on_exit(fn -> Application.put_env(:bugsnag, :release_stage, old_stage) end)
 
     assert capture_log(fn -> Bugsnag.start(:temporary, %{}) end) == ""
   end
 
   test "it should not explode with logger unset" do
     Application.put_env(:bugsnag, :use_logger, nil)
-    on_exit fn -> Application.put_env(:bugsnag, :use_logger, true) end
+    on_exit(fn -> Application.put_env(:bugsnag, :use_logger, true) end)
 
     Bugsnag.start(:temporary, %{})
     assert Application.get_env(:bugsnag, :use_logger) == nil
@@ -64,18 +63,20 @@ defmodule BugsnagTest do
   test "warns and returns an error when sending a report with no API key configured" do
     {:ok, old_key} = Application.fetch_env(:bugsnag, :api_key)
     Application.delete_env(:bugsnag, :api_key)
-    on_exit fn -> Application.put_env(:bugsnag, :api_key, old_key) end
+    on_exit(fn -> Application.put_env(:bugsnag, :api_key, old_key) end)
 
-    log = capture_log fn ->
-      assert {:error, %{reason: "API key is not configured"}} == Bugsnag.sync_report("error!")
-    end
+    log =
+      capture_log(fn ->
+        assert {:error, %{reason: "API key is not configured"}} == Bugsnag.sync_report("error!")
+      end)
+
     assert log =~ "api_key is not configured"
   end
 
   test "does not notify bugsnag if you use sync_report and release_stage is not included in the notify_release_stages" do
     old_release_stage = Application.get_env(:bugsnag, :release_stage)
     Application.put_env(:bugsnag, :release_stage, "development")
-    on_exit fn -> Application.put_env(:bugsnag, :release_stage, old_release_stage) end
+    on_exit(fn -> Application.put_env(:bugsnag, :release_stage, old_release_stage) end)
 
     refute Enum.member?(Application.get_env(:bugsnag, :notify_release_stages), "development")
     assert {:ok, :not_sent} = Bugsnag.sync_report(RuntimeError.exception("some_error"))
@@ -88,8 +89,8 @@ defmodule BugsnagTest do
     Application.put_env(:bugsnag, :release_stage, "development")
     Application.put_env(:bugsnag, :notify_release_stages, ["development"])
 
-    on_exit fn -> Application.put_env(:bugsnag, :release_stage, old_release_stage) end
-    on_exit fn -> Application.put_env(:bugsnag, :notify_release_stages, old_notify_stages) end
+    on_exit(fn -> Application.put_env(:bugsnag, :release_stage, old_release_stage) end)
+    on_exit(fn -> Application.put_env(:bugsnag, :notify_release_stages, old_notify_stages) end)
 
     assert :ok = Bugsnag.sync_report(RuntimeError.exception("some_error"))
   end
