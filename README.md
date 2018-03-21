@@ -43,7 +43,7 @@ You can use environment variables in order to set up all options. You can set de
 - `BUGSNAG_USE_LOGGER`
 - `BUGSNAG_RELEASE_STAGE`
 - `BUGSNAG_NOTIFY_RELEASE_STAGES`
-- `HOSTNAME`
+- `BUGSNAG_HOSTNAME`
 
 Or you can define from which env vars it should be loaded, eg:
 

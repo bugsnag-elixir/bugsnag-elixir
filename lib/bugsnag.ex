@@ -99,7 +99,7 @@ defmodule Bugsnag do
       use_logger:    {:system, "BUGSNAG_USE_LOGGER", true},
       release_stage: {:system, "BUGSNAG_RELEASE_STAGE", "production"},
       notify_release_stages: {:system, "BUGSNAG_NOTIFY_RELEASE_STAGES", ["production"]},
-      hostname:      {:system, "HOSTNAME", "unknown"}
+      hostname:      {:system, "BUGSNAG_HOSTNAME", "unknown"}
     ]
   end
 
