@@ -118,6 +118,11 @@ defmodule Bugsnag.PayloadTest do
     assert "some-host"        == evt.device.hostname
   end
 
+  test "it reports the hostname in the application's config if specified" do
+    assert "unknown" == get_event().device.hostname
+    assert "some-host" == get_event(hostname: "some-host").device.hostname
+  end
+
   test "it reports the notifier" do
     assert %{name: "Bugsnag Elixir",
              url: "https://github.com/jarednorman/bugsnag-elixir",

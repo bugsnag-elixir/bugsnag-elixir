@@ -31,7 +31,7 @@ defmodule Bugsnag.Payload do
       |> add_severity(Keyword.get(options, :severity))
       |> add_context(Keyword.get(options, :context))
       |> add_user(Keyword.get(options, :user))
-      |> add_device(Keyword.get(options, :os_version), Keyword.get(options, :hostname))
+      |> add_device(Keyword.get(options, :os_version), fetch_option(options, :hostname, "unknown"))
       |> add_metadata(Keyword.get(options, :metadata))
       |> add_release_stage(fetch_option(options, :release_stage, "production"))
       |> add_notify_release_stages(fetch_option(options, :notify_release_stages, ["production"]))
