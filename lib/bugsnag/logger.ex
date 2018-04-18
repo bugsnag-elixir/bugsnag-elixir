@@ -2,9 +2,9 @@ defmodule Bugsnag.Logger do
   require Bugsnag
   require Logger
 
-  use GenEvent
+  @behaviour :gen_event
 
-  def init(_mod, []), do: {:ok, []}
+  def init([]), do: {:ok, []}
 
   def handle_call({:configure, new_keys}, _state) do
     {:ok, :ok, new_keys}
