@@ -17,7 +17,7 @@ defmodule Bugsnag.Payload do
     |> add_event(exception, stacktrace, options)
   end
 
-  defp fetch_option(options, key, default \\ "development") do
+  defp fetch_option(options, key, default \\ nil) do
     Keyword.get options, key, Application.get_env(:bugsnag, key, default)
   end
 
@@ -35,6 +35,8 @@ defmodule Bugsnag.Payload do
       |> add_metadata(Keyword.get(options, :metadata))
       |> add_release_stage(fetch_option(options, :release_stage, "production"))
       |> add_notify_release_stages(fetch_option(options, :notify_release_stages, ["production"]))
+      |> add_app_type(fetch_option(options, :app_type))
+      |> add_app_version(fetch_option(options, :app_version))
 
     Map.put payload, :events, [event]
   end
@@ -70,6 +72,19 @@ defmodule Bugsnag.Payload do
     if Enum.empty?(device),
     do:   event,
     else: Map.put(event, :device, device)
+  end
+
+  defp add_app_type(event, type) do
+    event
+    |> Map.put_new(:app, %{})
+    |> put_in([:app, :type], type)
+  end
+
+  defp add_app_version(event, nil), do: event
+  defp add_app_version(event, version) do
+    event
+    |> Map.put_new(:app, %{})
+    |> put_in([:app, :version], version)
   end
 
   defp add_metadata(event, nil), do: event
