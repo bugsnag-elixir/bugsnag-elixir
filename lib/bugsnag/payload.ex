@@ -1,8 +1,8 @@
 defmodule Bugsnag.Payload do
   @notifier_info %{
     name: "Bugsnag Elixir",
-    version: Bugsnag.Mixfile.project[:version],
-    url: Bugsnag.Mixfile.project[:package][:links][:github],
+    version: Bugsnag.Mixfile.project()[:version],
+    url: Bugsnag.Mixfile.project()[:package][:links][:github]
   }
 
   defstruct api_key: nil, notifier: @notifier_info, events: nil
@@ -18,44 +18,54 @@ defmodule Bugsnag.Payload do
   end
 
   defp fetch_option(options, key, default \\ nil) do
-    Keyword.get options, key, Application.get_env(:bugsnag, key, default)
+    Keyword.get(options, key, Application.get_env(:bugsnag, key, default))
   end
 
   defp add_event(payload, exception, stacktrace, options) do
     error = Exception.normalize(:error, exception)
 
     event =
-      Map.new
+      Map.new()
       |> add_payload_version
       |> add_exception(error, stacktrace)
       |> add_severity(Keyword.get(options, :severity))
       |> add_context(Keyword.get(options, :context))
       |> add_user(Keyword.get(options, :user))
-      |> add_device(Keyword.get(options, :os_version), fetch_option(options, :hostname, "unknown"))
+      |> add_device(
+        Keyword.get(options, :os_version),
+        fetch_option(options, :hostname, "unknown")
+      )
       |> add_metadata(Keyword.get(options, :metadata))
       |> add_release_stage(fetch_option(options, :release_stage, "production"))
       |> add_notify_release_stages(fetch_option(options, :notify_release_stages, ["production"]))
       |> add_app_type(fetch_option(options, :app_type))
       |> add_app_version(fetch_option(options, :app_version))
 
-    Map.put payload, :events, [event]
+    Map.put(payload, :events, [event])
   end
 
   defp add_exception(event, exception, stacktrace) do
-    Map.put event, :exceptions, [%{
-      errorClass: exception.__struct__,
-      message: Exception.message(exception),
-      stacktrace: format_stacktrace(stacktrace)
-    }]
+    Map.put(event, :exceptions, [
+      %{
+        errorClass: exception.__struct__,
+        message: Exception.message(exception),
+        stacktrace: format_stacktrace(stacktrace)
+      }
+    ])
   end
 
   defp add_payload_version(event), do: Map.put(event, :payloadVersion, "2")
 
-  defp add_severity(event, severity) when severity in ~w(error warning info), do: Map.put(event, :severity, severity)
+  defp add_severity(event, severity) when severity in ~w(error warning info),
+    do: Map.put(event, :severity, severity)
+
   defp add_severity(event, _), do: Map.put(event, :severity, "error")
 
-  defp add_release_stage(event, release_stage), do: Map.put(event, :app, %{releaseStage: release_stage})
-  defp add_notify_release_stages(event, notify_release_stages), do: Map.put(event, :notifyReleaseStages, notify_release_stages)
+  defp add_release_stage(event, release_stage),
+    do: Map.put(event, :app, %{releaseStage: release_stage})
+
+  defp add_notify_release_stages(event, notify_release_stages),
+    do: Map.put(event, :notifyReleaseStages, notify_release_stages)
 
   defp add_context(event, nil), do: event
   defp add_context(event, context), do: Map.put(event, :context, context)
@@ -70,8 +80,8 @@ defmodule Bugsnag.Payload do
       |> Map.merge(if hostname, do: %{hostname: hostname}, else: %{})
 
     if Enum.empty?(device),
-    do:   event,
-    else: Map.put(event, :device, device)
+      do: event,
+      else: Map.put(event, :device, device)
   end
 
   defp add_app_type(event, type) do
@@ -81,6 +91,7 @@ defmodule Bugsnag.Payload do
   end
 
   defp add_app_version(event, nil), do: event
+
   defp add_app_version(event, version) do
     event
     |> Map.put_new(:app, %{})
@@ -91,15 +102,17 @@ defmodule Bugsnag.Payload do
   defp add_metadata(event, metadata), do: Map.put(event, :metaData, metadata)
 
   defp format_stacktrace(stacktrace) do
-    Enum.map stacktrace, fn
-      ({ module, function, args, [] }) ->
+    Enum.map(stacktrace, fn
+      {module, function, args, []} ->
         %{
           file: "unknown",
           lineNumber: 0,
           method: Exception.format_mfa(module, function, args)
         }
-      ({ module, function, args, [file: file, line: line_number] }) ->
-        file = to_string file
+
+      {module, function, args, [file: file, line: line_number]} ->
+        file = to_string(file)
+
         %{
           file: file,
           lineNumber: line_number,
@@ -107,17 +120,17 @@ defmodule Bugsnag.Payload do
           method: Exception.format_mfa(module, function, args),
           code: get_file_contents(file, line_number)
         }
-    end
+    end)
   end
 
   defp get_file_contents(file, line_number) do
-    file = File.cwd! |> Path.join(file)
+    file = File.cwd!() |> Path.join(file)
 
     if File.exists?(file) do
       file
-      |> File.stream!
-      |> Stream.with_index
-      |> Stream.map(fn({line, index}) -> {to_string(index + 1), line} end)
+      |> File.stream!()
+      |> Stream.with_index()
+      |> Stream.map(fn {line, index} -> {to_string(index + 1), line} end)
       |> Enum.slice(if(line_number - 4 > 0, do: line_number - 4, else: 0), 7)
       |> Enum.into(%{})
     end
