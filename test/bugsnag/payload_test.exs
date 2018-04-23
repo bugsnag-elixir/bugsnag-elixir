@@ -123,6 +123,19 @@ defmodule Bugsnag.PayloadTest do
     assert "some-host" == get_event(hostname: "some-host").device.hostname
   end
 
+  test "it reports the app type" do
+    assert "elixir" == get_event().app.type
+    assert "phoenix" == get_event(app_type: "phoenix").app.type
+  end
+
+  test "app version isn't set by default" do
+    refute Map.has_key?(get_event().app, :version)
+  end
+
+  test "it reports the app version" do
+    assert "1.2.3" == get_event(app_version: "1.2.3").app.version
+  end
+
   test "it reports the notifier" do
     assert %{name: "Bugsnag Elixir",
              url: "https://github.com/jarednorman/bugsnag-elixir",

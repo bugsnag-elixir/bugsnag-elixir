@@ -25,6 +25,9 @@ config :bugsnag, release_stage: "production"
 # Defaults to ["production"]
 config :bugsnag, notify_release_stages: ["production"]
 
+# Set app version, so "fixed" errors won't come back within the same version
+config :bugsnag, app_version: Mix.Project.config[:version]
+
 # Set `use_logger: true` to report all uncaught exceptions (using Erlang SASL)
 config :bugsnag, use_logger: true
 
@@ -44,6 +47,8 @@ You can use environment variables in order to set up all options. You can set de
 - `BUGSNAG_RELEASE_STAGE`
 - `BUGSNAG_NOTIFY_RELEASE_STAGES`
 - `BUGSNAG_HOSTNAME`
+- `BUGSNAG_APP_TYPE`
+- `BUGSNAG_APP_VERSION`
 
 Or you can define from which env vars it should be loaded, eg:
 
@@ -54,6 +59,8 @@ config :bugsnag, :release_stage,  {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :notify_release_stages,  {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :use_logger,     {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :hostname,       {:system, "YOUR_ENV_VAR" [, optional_default]}
+config :bugsnag, :app_type,       {:system, "YOUR_ENV_VAR" [, optional_default]}
+config :bugsnag, :app_version,    {:system, "YOUR_ENV_VAR" [, optional_default]}
 ```
 
 Ofcourse you can use regular values as in Installation guide.
@@ -97,6 +104,8 @@ They can be passed into the `Bugsnag.report/2` function like so:
   - `name` - Full name of the user
   - `email` - Full email of the user
 - `os_version` and `hostname` - Will be aggregated within Bugsnag's `device` field and can be used as a filter
+- `app_type` - The application type (defaults to `elixir`)
+- `app_version` - The version of your application in which the error occurred
 - `metadata` - Arbitrary metadata (See [Bugsnag docs](https://docs.bugsnag.com/api/error-reporting/#json-payload) for more information)
 
 ### Logger
