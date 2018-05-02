@@ -98,7 +98,8 @@ defmodule Bugsnag do
       notify_release_stages: {:system, "BUGSNAG_NOTIFY_RELEASE_STAGES", ["production"]},
       hostname: {:system, "BUGSNAG_HOSTNAME", "unknown"},
       app_type: {:system, "BUGSNAG_APP_TYPE", "elixir"},
-      app_version: {:system, "BUGSNAG_APP_VERSION", nil}
+      app_version: {:system, "BUGSNAG_APP_VERSION", nil},
+      in_project: {:system, "BUGSNAG_IN_PROJECT", nil}
     ]
   end
 

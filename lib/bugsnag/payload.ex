@@ -27,7 +27,7 @@ defmodule Bugsnag.Payload do
     event =
       Map.new()
       |> add_payload_version
-      |> add_exception(error, stacktrace)
+      |> add_exception(error, stacktrace, options)
       |> add_severity(Keyword.get(options, :severity))
       |> add_context(Keyword.get(options, :context))
       |> add_user(Keyword.get(options, :user))
@@ -44,12 +44,12 @@ defmodule Bugsnag.Payload do
     Map.put(payload, :events, [event])
   end
 
-  defp add_exception(event, exception, stacktrace) do
+  defp add_exception(event, exception, stacktrace, options) do
     Map.put(event, :exceptions, [
       %{
         errorClass: exception.__struct__,
         message: Exception.message(exception),
-        stacktrace: format_stacktrace(stacktrace)
+        stacktrace: format_stacktrace(stacktrace, options)
       }
     ])
   end
@@ -101,12 +101,15 @@ defmodule Bugsnag.Payload do
   defp add_metadata(event, nil), do: event
   defp add_metadata(event, metadata), do: Map.put(event, :metaData, metadata)
 
-  defp format_stacktrace(stacktrace) do
+  defp format_stacktrace(stacktrace, options) do
+    in_project_fn = get_in_project_fn(options)
+
     Enum.map(stacktrace, fn
       {module, function, args, []} ->
         %{
           file: "unknown",
           lineNumber: 0,
+          inProject: false,
           method: Exception.format_mfa(module, function, args)
         }
 
@@ -116,11 +119,30 @@ defmodule Bugsnag.Payload do
         %{
           file: file,
           lineNumber: line_number,
-          inProject: Regex.match?(~r/^(lib|web)/, file),
+          inProject: in_project_fn.({module, function, args, file}),
           method: Exception.format_mfa(module, function, args),
           code: get_file_contents(file, line_number)
         }
     end)
+  end
+
+  defp get_in_project_fn(options) do
+    case fetch_option(options, :in_project, nil) do
+      func when is_function(func) ->
+        func
+
+      {mod, fun, args} ->
+        fn stack_frame -> apply(mod, fun, [stack_frame | args]) end
+
+      %Regex{} = re ->
+        fn {_m, _f, _a, file} -> Regex.match?(re, file) end
+
+      str when is_binary(str) ->
+        fn {_m, _f, _a, file} -> String.contains?(file, str) end
+
+      _other ->
+        fn _ -> false end
+    end
   end
 
   defp get_file_contents(file, line_number) do

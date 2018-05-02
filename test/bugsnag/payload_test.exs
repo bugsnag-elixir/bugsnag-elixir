@@ -91,6 +91,55 @@ defmodule Bugsnag.PayloadTest do
     ] = stacktrace
   end
 
+  test "reports stack frames as not being in-project by default" do
+    [
+      %{file: "unknown", inProject: false},
+      %{file: "test/bugsnag/payload_test.exs", inProject: false} | _
+    ] = get_exception().stacktrace
+  end
+
+  test "allows in-project classification based on substring match of the filename" do
+    in_project = "bugsnag/payload_test"
+
+    [
+      %{file: "unknown", inProject: false},
+      %{file: "test/bugsnag/payload_test.exs", inProject: true} | _
+    ] = get_exception(in_project: in_project).stacktrace
+  end
+
+  test "allows in-project classification based on regex match of the filename" do
+    in_project = ~r(^test.*bugsnag)
+
+    [
+      %{file: "unknown", inProject: false},
+      %{file: "test/bugsnag/payload_test.exs", inProject: true} | _
+    ] = get_exception(in_project: in_project).stacktrace
+  end
+
+  test "allows in-project classification by calling an anonymous function per stack frame" do
+    in_project = fn {_mod, fun, _args, _file} -> fun == :get_problem end
+
+    [
+      %{file: "unknown", inProject: false},
+      %{method: "Bugsnag.PayloadTest.get_problem/0", inProject: true},
+      %{method: "Bugsnag.PayloadTest" <> _, inProject: false} | _
+    ] = get_exception(in_project: in_project).stacktrace
+  end
+
+  test "allows in-project classification by calling a module function per stack frame" do
+    defmodule MyApp do
+      def in_project?({_mod, fun, _args, _file}, extra_arg), do: fun == extra_arg
+    end
+
+    in_project = {MyApp, :in_project?, [:get_problem]}
+
+    [
+      %{file: "unknown", inProject: false},
+      %{method: "Bugsnag.PayloadTest.get_problem/0", inProject: true},
+      %{method: "Bugsnag.PayloadTest" <> _, inProject: false} | _
+    ] = get_exception(in_project: in_project).stacktrace
+  end
+
   test "it reports the error class" do
     assert UndefinedFunctionError == get_exception().errorClass
   end
