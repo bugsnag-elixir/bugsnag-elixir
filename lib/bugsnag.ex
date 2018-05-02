@@ -99,12 +99,14 @@ defmodule Bugsnag do
       hostname: {:system, "BUGSNAG_HOSTNAME", "unknown"},
       app_type: {:system, "BUGSNAG_APP_TYPE", "elixir"},
       app_version: {:system, "BUGSNAG_APP_VERSION", nil},
-      in_project: {__MODULE__, :in_project?}
+      in_project: {__MODULE__, :file_matches?, [~r/^(lib|web)/]}
     ]
   end
 
-  def in_project?(file) do
-    Regex.match?(~r/^(lib|web)/, file)
+  def file_matches?({_module, _fun, _args, file}, patterns) do
+    Enum.any?(patterns, fn (pattern) ->
+      String.match?(file, pattern)
+    end)
   end
 
   defp eval_config({:system, env_var, default}) do

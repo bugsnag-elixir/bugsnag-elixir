@@ -27,7 +27,7 @@ defmodule Bugsnag.Payload do
     event =
       Map.new()
       |> add_payload_version
-      |> add_exception(error, stacktrace)
+      |> add_exception(error, stacktrace, options)
       |> add_severity(Keyword.get(options, :severity))
       |> add_context(Keyword.get(options, :context))
       |> add_user(Keyword.get(options, :user))
@@ -44,12 +44,12 @@ defmodule Bugsnag.Payload do
     Map.put(payload, :events, [event])
   end
 
-  defp add_exception(event, exception, stacktrace) do
+  defp add_exception(event, exception, stacktrace, options) do
     Map.put(event, :exceptions, [
       %{
         errorClass: exception.__struct__,
         message: Exception.message(exception),
-        stacktrace: format_stacktrace(stacktrace)
+        stacktrace: format_stacktrace(stacktrace, options)
       }
     ])
   end
@@ -101,8 +101,8 @@ defmodule Bugsnag.Payload do
   defp add_metadata(event, nil), do: event
   defp add_metadata(event, metadata), do: Map.put(event, :metaData, metadata)
 
-  defp format_stacktrace(stacktrace) do
-    {in_project_mod, in_project_fun} = Application.get_env(:bugsnag, :in_project)
+  defp format_stacktrace(stacktrace, options) do
+    {ip_mod, ip_fun, ip_state} = fetch_option(options, :in_project, {Bugsnag, :file_matches?, [~r/^(lib|web)/]})
     Enum.map(stacktrace, fn
       {module, function, args, []} ->
         %{
@@ -117,7 +117,7 @@ defmodule Bugsnag.Payload do
         %{
           file: file,
           lineNumber: line_number,
-          inProject: apply(in_project_mod, in_project_fun, [file]),
+          inProject: apply(ip_mod, ip_fun, [{module, function, args, file}, ip_state]),
           method: Exception.format_mfa(module, function, args),
           code: get_file_contents(file, line_number)
         }
