@@ -102,7 +102,9 @@ defmodule Bugsnag.Payload do
   defp add_metadata(event, metadata), do: Map.put(event, :metaData, metadata)
 
   defp format_stacktrace(stacktrace, options) do
-    {ip_mod, ip_fun, ip_state} = fetch_option(options, :in_project, {Bugsnag, :file_matches?, [~r/^(lib|web)/]})
+    {ip_mod, ip_fun, ip_state} =
+      fetch_option(options, :in_project, {Bugsnag, :file_matches?, [~r/^(lib|web)/]})
+
     Enum.map(stacktrace, fn
       {module, function, args, []} ->
         %{

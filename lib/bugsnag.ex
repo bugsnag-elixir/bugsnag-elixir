@@ -104,7 +104,7 @@ defmodule Bugsnag do
   end
 
   def file_matches?({_module, _fun, _args, file}, patterns) do
-    Enum.any?(patterns, fn (pattern) ->
+    Enum.any?(patterns, fn pattern ->
       String.match?(file, pattern)
     end)
   end
