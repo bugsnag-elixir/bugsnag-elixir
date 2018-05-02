@@ -98,8 +98,13 @@ defmodule Bugsnag do
       notify_release_stages: {:system, "BUGSNAG_NOTIFY_RELEASE_STAGES", ["production"]},
       hostname: {:system, "BUGSNAG_HOSTNAME", "unknown"},
       app_type: {:system, "BUGSNAG_APP_TYPE", "elixir"},
-      app_version: {:system, "BUGSNAG_APP_VERSION", nil}
+      app_version: {:system, "BUGSNAG_APP_VERSION", nil},
+      in_project: {__MODULE__, :in_project?}
     ]
+  end
+
+  def in_project?(file) do
+    Regex.match?(~r/^(lib|web)/, file)
   end
 
   defp eval_config({:system, env_var, default}) do

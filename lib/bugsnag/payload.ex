@@ -102,6 +102,7 @@ defmodule Bugsnag.Payload do
   defp add_metadata(event, metadata), do: Map.put(event, :metaData, metadata)
 
   defp format_stacktrace(stacktrace) do
+    {in_project_mod, in_project_fun} = Application.get_env(:bugsnag, :in_project)
     Enum.map(stacktrace, fn
       {module, function, args, []} ->
         %{
@@ -116,7 +117,7 @@ defmodule Bugsnag.Payload do
         %{
           file: file,
           lineNumber: line_number,
-          inProject: Regex.match?(~r/^(lib|web)/, file),
+          inProject: apply(in_project_mod, in_project_fun, [file]),
           method: Exception.format_mfa(module, function, args),
           code: get_file_contents(file, line_number)
         }
