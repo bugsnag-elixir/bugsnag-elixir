@@ -102,8 +102,7 @@ defmodule Bugsnag.Payload do
   defp add_metadata(event, metadata), do: Map.put(event, :metaData, metadata)
 
   defp format_stacktrace(stacktrace, options) do
-    {ip_mod, ip_fun, ip_state} =
-      fetch_option(options, :in_project, {Bugsnag, :file_matches?, [~r/^(lib|web)/]})
+    in_project_fn = get_in_project_fn(options)
 
     Enum.map(stacktrace, fn
       {module, function, args, []} ->
@@ -119,11 +118,32 @@ defmodule Bugsnag.Payload do
         %{
           file: file,
           lineNumber: line_number,
-          inProject: apply(ip_mod, ip_fun, [{module, function, args, file}, ip_state]),
+          inProject: in_project_fn.({module, function, args, file}),
           method: Exception.format_mfa(module, function, args),
           code: get_file_contents(file, line_number)
         }
     end)
+  end
+
+  @spec get_in_project_fn(Keyword.t) :: (stack_frame -> boolean) when
+        stack_frame: {module, function :: atom, args :: list, String.t}
+  defp get_in_project_fn(options) do
+    always_false_fn = fn(_stack_frame) -> false end
+    case fetch_option(options, :in_project, nil) do
+      {mod, fun, state} ->
+        fn(stack_frame) -> apply(mod, fun, [stack_frame, state]) end
+      %Regex{} = re ->
+        fn({_m, _f, _a, file}) -> Regex.match?(re, file) end
+      re_str when is_binary(re_str) ->
+        case Regex.compile(re_str) do
+          {:ok, re} ->
+            fn({_m, _f, _a, file}) -> Regex.match?(re, file) end
+          {:error, _reason} ->
+            always_false_fn
+        end
+      _other ->
+        always_false_fn
+    end
   end
 
   defp get_file_contents(file, line_number) do
