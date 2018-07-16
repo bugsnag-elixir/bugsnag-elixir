@@ -33,6 +33,21 @@ config :bugsnag, use_logger: true
 
 # Override the default bugsnag endpoint url
 config :bugsnag, endpoint_url: "https://notify.bugsnag.com"
+
+# Tell bugsnag to mark stack frames containing "myproj" as in-project
+config :bugsnag, in_project: "myproj"
+
+# Tell bugsnag to mark stack frames starting with "lib/myproj" as in-project
+config :bugsnag, in_project: ~r/lib\/myproj/
+
+# Tell bugsnag to call a function per stack frame to determine in-project
+defmodule MyProject
+  def in_project?({module, fun, args, line}, addl_mods) do
+    module in addl_mods or line =~ r/^lib\/myproj/
+  end
+end
+...
+config :bugsnag, in_project: {MyProject, :in_project?, [AddlMod1, AddlMod2]}
 ```
 
 ## Usage
@@ -49,6 +64,7 @@ You can use environment variables in order to set up all options. You can set de
 - `BUGSNAG_HOSTNAME`
 - `BUGSNAG_APP_TYPE`
 - `BUGSNAG_APP_VERSION`
+- `BUGSNAG_IN_PROJECT_REGEX`
 
 Or you can define from which env vars it should be loaded, eg:
 
@@ -61,9 +77,10 @@ config :bugsnag, :use_logger,     {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :hostname,       {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :app_type,       {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :app_version,    {:system, "YOUR_ENV_VAR" [, optional_default]}
+config :bugsnag, :in_project,    {:system, "YOUR_ENV_VAR" [, optional_default]}
 ```
 
-Ofcourse you can use regular values as in Installation guide.
+Of course you can use regular values as in Installation guide.
 
 ### Manual reporting
 
