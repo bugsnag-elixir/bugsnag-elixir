@@ -13,6 +13,9 @@ defmodule Bugsnag do
       default_config()
       |> Keyword.merge(Application.get_all_env(:bugsnag))
       |> Enum.map(fn {k, v} -> {k, eval_config(v)} end)
+      |> Keyword.update!(:notify_release_stages, fn stages ->
+        if(is_binary(stages), do: String.split(stages, ","), else: stages)
+      end)
 
     if to_string(config[:use_logger]) == "true" do
       :error_logger.add_report_handler(Bugsnag.Logger)

@@ -60,7 +60,7 @@ You can use environment variables in order to set up all options. You can set de
 - `BUGSNAG_ENDPOINT_URL`
 - `BUGSNAG_USE_LOGGER`
 - `BUGSNAG_RELEASE_STAGE`
-- `BUGSNAG_NOTIFY_RELEASE_STAGES`
+- `BUGSNAG_NOTIFY_RELEASE_STAGES` (comma-separated)
 - `BUGSNAG_HOSTNAME`
 - `BUGSNAG_APP_TYPE`
 - `BUGSNAG_APP_VERSION`
