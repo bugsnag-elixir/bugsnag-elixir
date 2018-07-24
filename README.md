@@ -33,6 +33,21 @@ config :bugsnag, use_logger: true
 
 # Override the default bugsnag endpoint url
 config :bugsnag, endpoint_url: "https://notify.bugsnag.com"
+
+# Mark stack frames containing "myproj" as in-project
+config :bugsnag, in_project: "myproj"
+
+# ...or mark stack frames starting with "lib/myproj" as in-project
+config :bugsnag, in_project: ~r(^lib/myproj)
+
+# ...or call a function per stack frame that returns whether it is in-project
+config :bugsnag, in_project: {MyProject, :in_project?, []}
+
+defmodule MyProject
+  def in_project?({module, fun, args, line}) do
+    module in [SomeMod1, SomeMod2] or line =~ ~r(^lib/myproj)
+  end
+end
 ```
 
 ## Usage
@@ -49,6 +64,7 @@ You can use environment variables in order to set up all options. You can set de
 - `BUGSNAG_HOSTNAME`
 - `BUGSNAG_APP_TYPE`
 - `BUGSNAG_APP_VERSION`
+- `BUGSNAG_IN_PROJECT`
 
 Or you can define from which env vars it should be loaded, eg:
 
@@ -56,14 +72,15 @@ Or you can define from which env vars it should be loaded, eg:
 config :bugsnag, :api_key,        {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :endpoint_url,   {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :release_stage,  {:system, "YOUR_ENV_VAR" [, optional_default]}
-config :bugsnag, :notify_release_stages,  {:system, "YOUR_ENV_VAR" [, optional_default]}
+config :bugsnag, :notify_release_stages, {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :use_logger,     {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :hostname,       {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :app_type,       {:system, "YOUR_ENV_VAR" [, optional_default]}
 config :bugsnag, :app_version,    {:system, "YOUR_ENV_VAR" [, optional_default]}
+config :bugsnag, :in_project,     {:system, "YOUR_ENV_VAR" [, optional_default]}
 ```
 
-Ofcourse you can use regular values as in Installation guide.
+Of course you can use regular values as in Installation guide.
 
 ### Manual reporting
 
