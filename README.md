@@ -1,134 +1,252 @@
 # Bugsnag Elixir [![Build Status](https://travis-ci.org/jarednorman/bugsnag-elixir.svg?branch=master)](https://travis-ci.org/jarednorman/bugsnag-elixir)
 
-Capture exceptions and send them to the [Bugsnag](http://bugsnag.com) API!
+Capture exceptions and send them to the [Bugsnag](https://www.bugsnag.com/) API!
+
+🔗 See also: [Plugsnag], to snag exceptions in your Phoenix application.
+
+[Plugsnag]: https://github.com/jarednorman/plugsnag
+
+<!-- MarkdownTOC autolink="true" bracket="round" levels="1,2,3" -->
+
+- [Installation](#installation)
+- [Configuration](#configuration)
+  - [Example](#example)
+  - [`api_key`](#api_key)
+  - [`release_stage`](#release_stage)
+  - [`notify_release_stages`](#notify_release_stages)
+  - [`hostname`](#hostname)
+  - [`app_type`](#app_type)
+  - [`app_version`](#app_version)
+  - [`in_project`](#in_project)
+  - [`endpoint_url`](#endpoint_url)
+  - [`use_logger`](#use_logger)
+- [Usage](#usage)
+  - [Manual Reporting](#manual-reporting)
+  - [Reporting Options](#reporting-options)
+
+<!-- /MarkdownTOC -->
+
 
 ## Installation
 
 ```elixir
-# Add it to your deps in your projects mix.exs
+# mix.exs
 defp deps do
-  [{:bugsnag, "~> 1.5.0"}]
-end
-
-# Now, list the :bugsnag application as your application dependency:
-def application do
-  [applications: [:bugsnag]]
-end
-
-# Open up your config/config.exs (or appropriate project config)
-config :bugsnag, api_key: "bbf085fc54ff99498ebd18ab49a832dd"
-
-# Set the release stage in your environment configs (e.g. config/prod.exs)
-config :bugsnag, release_stage: "production"
-
-# Set the notify release stages to limit reporting the errors based on your environment
-# Defaults to ["production"]
-config :bugsnag, notify_release_stages: ["production"]
-
-# Set app version, so "fixed" errors won't come back within the same version
-config :bugsnag, app_version: Mix.Project.config[:version]
-
-# Set `use_logger: true` to report all uncaught exceptions (using Erlang SASL)
-config :bugsnag, use_logger: true
-
-# Override the default bugsnag endpoint url
-config :bugsnag, endpoint_url: "https://notify.bugsnag.com"
-
-# Mark stack frames containing "myproj" as in-project
-config :bugsnag, in_project: "myproj"
-
-# ...or mark stack frames starting with "lib/myproj" as in-project
-config :bugsnag, in_project: ~r(^lib/myproj)
-
-# ...or call a function per stack frame that returns whether it is in-project
-config :bugsnag, in_project: {MyProject, :in_project?, []}
-
-defmodule MyProject
-  def in_project?({module, fun, args, line}) do
-    module in [SomeMod1, SomeMod2] or line =~ ~r(^lib/myproj)
-  end
+  [{:bugsnag, "~> 1.6.0"}]
 end
 ```
+
+```elixir
+# config/config.exs
+config :bugsnag, api_key: "0123456789abcdef0123456789abcdef"
+```
+
+The `:bugsnag` application must be started to report errors — this should be
+done automatically by [application inference][1], as long as the `application`
+function in your `mix.exs` does not contain an `applications` key. If it does,
+you'll want to add `:bugsnag` to the list of applications.
+
+[1]: https://sergiotapia.me/application-inference-in-elixir-1-4-ae9e43e90301
+
+By default, the application adds an Erlang `:error_logger` handler on startup
+that will report most process crashes automatically. If you only want to report
+errors manually, this can be configured via the `use_logger` option (see below).
+
+
+## Configuration
+
+Although errors will be reported even if you only set an API key, some Bugsnag
+features (like release stage and app version tagging, or marking stack frames as
+"in-project") require additional configuration.
+
+All configuration options support `{:system, "ENV_VAR"}` tuples for retrieving
+values from environment variables at application startup. You can also specify
+a default value using `{:system, "ENV_VAR", "default_value"}`.
+
+### Example
+
+This config uses all available features. It assumes your project is a single
+application whose code is in `lib/my_app_name`, and you have an environment
+variable `MY_APP_ENV` set to values like `"staging"` or `"production"` depending
+on the runtime environment.
+
+```elixir
+# config/config.exs
+config :bugsnag,
+  api_key: "0123456789abcdef0123456789abcdef",
+  release_stage: {:system, "MY_APP_ENV", "production"},
+  notify_release_stages: ["staging", "production"],
+  hostname: {:system, "HOST", "unknown"},
+  app_version: Mix.Project.config[:version],
+  in_project: "lib/my_app_name"
+```
+
+See below for explanations of each option, including some options not used here.
+
+### `api_key`
+
+**Default:** `nil`
+
+Must be set to report errors.
+
+### `release_stage`
+
+**Default:** `"production"`
+
+Sets the default "release stage" for reported errors. If set to a value that is
+not included in `notify_release_stages`, all reports will be silently discarded.
+
+### `notify_release_stages`
+
+**Default:** `["production"]`
+
+If the configured `release_stage` is not in this list, all error reports are
+silently discarded. This allows ignoring errors in release stages you don't want
+to clutter your Bugsnag dashboard, e.g. development or test.
+
+To accommodate configuration via environment variables, if set to a string, the
+string will be split on commas (`,`).
+
+### `hostname`
+
+**Default:** `"unknown"`
+
+Sets the default hostname for reported errors.
+
+### `app_type`
+
+**Default:** `"elixir"`
+
+Sets the default application type for reported errors.
+
+### `app_version`
+
+**Default:** `nil`
+
+Sets the default application version for reported errors.
+
+### `in_project`
+
+**Default:** `nil`
+
+When reporting the stack trace of an exception, Bugsnag allows marking each
+stack frame as being "in your project" or not. This enables grouping errors by
+the deepest stack frame that is in your project. Unfortunately it's hard to do
+this automatically in Elixir, because file paths in stack traces are relative to
+the application the file is part of (i.e. all start with `lib/some_app/...`).
+Since we don't know which apps are "yours", this option must be set to enable
+marking stack frames as in-project.
+
+This option can be set in several ways:
+
+#### String Matching
+
+```elixir
+config :bugsnag, in_project: "lib/my_app_name"
+```
+
+If a stack frame's file path contains the string, it will be marked in-project.
+
+#### Regex Matching
+
+```elixir
+config :bugsnag, in_project: ~r(my_app_name|my_other_app)
+```
+
+If a stack frame's file path matches the regex, it will be marked in-project.
+
+#### Custom Function
+
+```elixir
+config :bugsnag, in_project: fn({module, function, arguments, file_path}) ->
+  module in [SomeMod, OtherMod] or file_path =~ ~r(^lib/my_project)
+end
+```
+
+If the function returns a truthy value when called with the stack frame as an
+argument, the stack frame will be marked in-project. You can also specify a
+function as a `{Module, :function, [extra_args]}` tuple (the stack frame tuple
+will be prepended as the first argument to the function).
+
+### `endpoint_url`
+
+**Default:** `"https://notify.bugsnag.com"`
+
+Allows sending reports to a different URL (e.g. if using Bugsnag On-premise).
+
+### `use_logger`
+
+**Default:** `true`
+
+Controls whether the default Erlang `:error_logger` handler is added on
+application startup. This will automatically report most process crashes.
+
 
 ## Usage
 
-### Configuration
+In the default configuration, unhandled exceptions that crash a process will be
+automatically reported to Bugsnag. If you want to report a rescued exception, or
+have `use_logger` disabled, you can send reports manually.
 
-You can use environment variables in order to set up all options. You can set default variable names, and don't touch config files, eg:
+### Manual Reporting
 
-- `BUGSNAG_API_KEY`
-- `BUGSNAG_ENDPOINT_URL`
-- `BUGSNAG_USE_LOGGER`
-- `BUGSNAG_RELEASE_STAGE`
-- `BUGSNAG_NOTIFY_RELEASE_STAGES` (comma-separated)
-- `BUGSNAG_HOSTNAME`
-- `BUGSNAG_APP_TYPE`
-- `BUGSNAG_APP_VERSION`
-- `BUGSNAG_IN_PROJECT`
-
-Or you can define from which env vars it should be loaded, eg:
+Use `Bugsnag.report` to report an exception:
 
 ```elixir
-config :bugsnag, :api_key,        {:system, "YOUR_ENV_VAR" [, optional_default]}
-config :bugsnag, :endpoint_url,   {:system, "YOUR_ENV_VAR" [, optional_default]}
-config :bugsnag, :release_stage,  {:system, "YOUR_ENV_VAR" [, optional_default]}
-config :bugsnag, :notify_release_stages, {:system, "YOUR_ENV_VAR" [, optional_default]}
-config :bugsnag, :use_logger,     {:system, "YOUR_ENV_VAR" [, optional_default]}
-config :bugsnag, :hostname,       {:system, "YOUR_ENV_VAR" [, optional_default]}
-config :bugsnag, :app_type,       {:system, "YOUR_ENV_VAR" [, optional_default]}
-config :bugsnag, :app_version,    {:system, "YOUR_ENV_VAR" [, optional_default]}
-config :bugsnag, :in_project,     {:system, "YOUR_ENV_VAR" [, optional_default]}
-```
-
-Of course you can use regular values as in Installation guide.
-
-### Manual reporting
-
-```elixir
-# Report an exception.
 try do
-  :foo = :bar
-rescue
-  exception -> Bugsnag.report(exception)
+  raise "heck"
+rescue exception ->
+  Bugsnag.report(exception)
 end
 ```
 
-In some cases you might want to send the report synchronously, to make sure that it got sent. You can do that with:
+This reports the exception in a separate process so your application code will
+not be held up. However, this means reporting could fail silently. If you want
+to wait on the report in your own process (and potentially crash, if reporting
+fails), use `Bugsnag.sync_report`:
 
 ```elixir
-# ...an exception occured
-  Bugsnag.sync_report(exception)
+try do
+  raise "heck"
+rescue exception ->
+  :ok = Bugsnag.sync_report(exception)
+end
 ```
 
-### Options
+### Reporting Options
 
-These are optional fields to fill the bugsnag report with more information, depending on your specific usage scenario.
-They can be passed into the `Bugsnag.report/2` function like so:
+Both `report` and `sync_report` accept an optional second argument to add more
+data to the report or override the application configuration:
 
 ```elixir
-# ...an exception occured
-  Bugsnag.report(exception, severity: "warn", user: %{name: "Jane Doe"})
+try do
+  raise "heck"
+rescue exception ->
+  Bugsnag.report(exception, severity: "warning", context: "worker")
+end
 ```
 
-- `api_key` - Allows overriding any configured api key manually
-- `stacktrace` - Allows explicitly passing in a stacktrace used to generate the stacktrace object that is sent to bugsnag
-- `severity` - Sets the severity explicitly to "error", "warning" or "info"
-- `release_stage` - Explicitly sets an arbitrary release stage e.g. "development", "test" or "production"
-- `notify_release_stages` - States in which environments, bugnsnag will report errors e.g. "development", "test" or "production". Defaults to ["production"]
-- `context` - Allows passing in context information, like e.g. the name of the file the crash occured in
-- `user` - Allows passing in user information, needs to be a map with one or more of the following fields (which are then searchable):
-  - `id` - Any binary identifier for the user
-  - `name` - Full name of the user
-  - `email` - Full email of the user
-- `os_version` and `hostname` - Will be aggregated within Bugsnag's `device` field and can be used as a filter
-- `app_type` - The application type (defaults to `elixir`)
-- `app_version` - The version of your application in which the error occurred
-- `metadata` - Arbitrary metadata (See [Bugsnag docs](https://docs.bugsnag.com/api/error-reporting/#json-payload) for more information)
+The following options override their corresponding app config values:
 
-### Logger
+* `api_key`
+* `release_stage`
+* `notify_release_stages`
+* `hostname`
+* `app_type`
+* `app_version`
 
-Set the `use_logger` option to true in your application's `config.exs`.
-So long as `:bugsnag` is started, any [SASL](http://www.erlang.org/doc/apps/sasl/error_logging.html)
-compliant processes that crash will send an error report to the `Bugsnag.Logger`.
-The logger will take care of sending the error to Bugsnag.
+The following options allow adding more data to the report:
 
+* `severity` — Sets the severity of the report (`error`, `warning`, or `info`)
+* `context` — Sets the "context" string (e.g. `controller#action` in Phoenix)
+* `user` — Map of information about the user who encountered the error:
+  * `id` - String ID for the user
+  * `name` - Full name of the user
+  * `email` - Email address of the user
+* `os_version` — Sets the reported OS version of the error
+* `stacktrace` — Allows passing in a stack trace, e.g. from `System.stacktrace`
+* `metadata` - Map of arbitrary metadata to include with the report
+
+[See the Bugsnag docs][2] for more information on these fields.
+
+[2]: https://bugsnagerrorreportingapi.docs.apiary.io/#reference/0/notify/send-error-reports
