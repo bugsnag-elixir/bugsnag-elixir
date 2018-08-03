@@ -32,7 +32,7 @@ Capture exceptions and send them to the [Bugsnag](https://www.bugsnag.com/) API!
 ```elixir
 # mix.exs
 defp deps do
-  [{:bugsnag, "~> 1.6.0"}]
+  [{:bugsnag, "~> 1.7.0"}]
 end
 ```
 
