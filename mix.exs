@@ -15,7 +15,7 @@ defmodule Bugsnag.Mixfile do
   def package do
     [
       contributors: ["Jared Norman", "Andrew Harvey", "Alex Grant", "Coburn Berry"],
-      maintainers: ["Alex Grant", "Coburn Berry"],
+      maintainers: ["Coburn Berry"],
       licenses: ["MIT"],
       links: %{github: "https://github.com/jarednorman/bugsnag-elixir"}
     ]
