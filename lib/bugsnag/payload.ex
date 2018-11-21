@@ -59,6 +59,9 @@ defmodule Bugsnag.Payload do
   defp add_severity(event, severity) when severity in ~w(error warning info),
     do: Map.put(event, :severity, severity)
 
+  defp add_severity(event, severity) when severity in ~w(error warning info)a,
+    do: Map.put(event, :severity, "#{severity}")
+
   defp add_severity(event, _), do: Map.put(event, :severity, "error")
 
   defp add_release_stage(event, release_stage),

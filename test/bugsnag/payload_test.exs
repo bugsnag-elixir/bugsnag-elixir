@@ -153,6 +153,10 @@ defmodule Bugsnag.PayloadTest do
     assert "info" == get_event(severity: "info").severity
     assert "warning" == get_event(severity: "warning").severity
     assert "error" == get_event(severity: "").severity
+    assert "error" == get_event(severity: :error).severity
+    assert "info" == get_event(severity: :info).severity
+    assert "warning" == get_event(severity: :warning).severity
+    assert "error" == get_event(severity: :another).severity
   end
 
   test "it reports the release stage" do
