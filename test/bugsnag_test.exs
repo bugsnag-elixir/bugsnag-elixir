@@ -3,6 +3,18 @@ defmodule BugsnagTest do
 
   import ExUnit.CaptureLog
 
+  defmodule FilterAll do
+    def should_notify(_e, _s), do: false
+  end
+
+  defmodule FilterNone do
+    def should_notify(_e, _s), do: true
+  end
+
+  defmodule FilterCrash do
+    def should_notify(_e, _s), do: raise "boom"
+  end
+
   test "it doesn't raise errors if you report garbage" do
     capture_log(fn ->
       Bugsnag.report(Enum, %{ignore: :this_error_in_test})
@@ -78,12 +90,57 @@ defmodule BugsnagTest do
     assert {:ok, :not_sent} = Bugsnag.sync_report(RuntimeError.exception("some_error"))
   end
 
+  test "does not notify bugsnag if filter returns false" do
+    old_release_stage = Application.get_env(:bugsnag, :release_stage)
+    old_notify_stages = Application.get_env(:bugsnag, :notify_release_stages)
+
+    Application.put_env(:bugsnag, :release_stage, "development")
+    Application.put_env(:bugsnag, :notify_release_stages, ["development"])
+    Application.put_env(:bugsnag, :exception_filter, __MODULE__.FilterAll)
+
+    on_exit(fn -> Application.put_env(:bugsnag, :release_stage, old_release_stage) end)
+    on_exit(fn -> Application.put_env(:bugsnag, :notify_release_stages, old_notify_stages) end)
+    on_exit(fn -> Application.put_env(:bugsnag, :exception_filter, nil) end)
+
+    assert {:ok, :not_sent} = Bugsnag.sync_report(RuntimeError.exception("some_error"))
+  end
+
+  test "notifies bugsnag if filter returns true" do
+    old_release_stage = Application.get_env(:bugsnag, :release_stage)
+    old_notify_stages = Application.get_env(:bugsnag, :notify_release_stages)
+
+    Application.put_env(:bugsnag, :release_stage, "development")
+    Application.put_env(:bugsnag, :notify_release_stages, ["development"])
+    Application.put_env(:bugsnag, :exception_filter, __MODULE__.FilterNone)
+
+    on_exit(fn -> Application.put_env(:bugsnag, :release_stage, old_release_stage) end)
+    on_exit(fn -> Application.put_env(:bugsnag, :notify_release_stages, old_notify_stages) end)
+    on_exit(fn -> Application.put_env(:bugsnag, :exception_filter, nil) end)
+
+    assert :ok = Bugsnag.sync_report(RuntimeError.exception("some_error"))
+  end
+
   test "notifies bugsnag if you use sync_report and release_stage is included in the notify_release_stages" do
     old_release_stage = Application.get_env(:bugsnag, :release_stage)
     old_notify_stages = Application.get_env(:bugsnag, :notify_release_stages)
 
     Application.put_env(:bugsnag, :release_stage, "development")
     Application.put_env(:bugsnag, :notify_release_stages, ["development"])
+    Application.put_env(:bugsnag, :exception_filter, nil)
+
+    on_exit(fn -> Application.put_env(:bugsnag, :release_stage, old_release_stage) end)
+    on_exit(fn -> Application.put_env(:bugsnag, :notify_release_stages, old_notify_stages) end)
+
+    assert :ok = Bugsnag.sync_report(RuntimeError.exception("some_error"))
+  end
+
+  test "notifies bugsnag if filter throws exception" do
+    old_release_stage = Application.get_env(:bugsnag, :release_stage)
+    old_notify_stages = Application.get_env(:bugsnag, :notify_release_stages)
+
+    Application.put_env(:bugsnag, :release_stage, "development")
+    Application.put_env(:bugsnag, :notify_release_stages, ["development"])
+    Application.put_env(:bugsnag, :exception_filter, __MODULE__.FilterCrash)
 
     on_exit(fn -> Application.put_env(:bugsnag, :release_stage, old_release_stage) end)
     on_exit(fn -> Application.put_env(:bugsnag, :notify_release_stages, old_notify_stages) end)
