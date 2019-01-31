@@ -12,7 +12,7 @@ defmodule BugsnagTest do
   end
 
   defmodule FilterCrash do
-    def should_notify(_e, _s), do: raise "boom"
+    def should_notify(_e, _s), do: raise("boom")
   end
 
   test "it doesn't raise errors if you report garbage" do

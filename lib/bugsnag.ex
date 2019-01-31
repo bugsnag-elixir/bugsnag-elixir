@@ -136,7 +136,7 @@ defmodule Bugsnag do
     rescue
       _ ->
         # Swallowing error in order to avoid exception loops
-       true
+        true
     end
   end
 end
