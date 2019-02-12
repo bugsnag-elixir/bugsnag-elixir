@@ -1,4 +1,6 @@
 defmodule Bugsnag.Payload do
+  require Logger
+
   @notifier_info %{
     name: "Bugsnag Elixir",
     version: Bugsnag.Mixfile.project()[:version],
@@ -48,7 +50,7 @@ defmodule Bugsnag.Payload do
     Map.put(event, :exceptions, [
       %{
         errorClass: exception.__struct__,
-        message: Exception.message(exception),
+        message: sanitize(Exception.message(exception)),
         stacktrace: format_stacktrace(stacktrace, options)
       }
     ])
@@ -110,7 +112,7 @@ defmodule Bugsnag.Payload do
           file: "unknown",
           lineNumber: 0,
           inProject: false,
-          method: Exception.format_mfa(module, function, args)
+          method: sanitize(Exception.format_mfa(module, function, args))
         }
 
       {module, function, args, [file: file, line: line_number]} ->
@@ -120,7 +122,7 @@ defmodule Bugsnag.Payload do
           file: file,
           lineNumber: line_number,
           inProject: in_project_fn.({module, function, args, file}),
-          method: Exception.format_mfa(module, function, args),
+          method: sanitize(Exception.format_mfa(module, function, args)),
           code: get_file_contents(file, line_number)
         }
     end)
@@ -156,5 +158,26 @@ defmodule Bugsnag.Payload do
       |> Enum.slice(if(line_number - 4 > 0, do: line_number - 4, else: 0), 7)
       |> Enum.into(%{})
     end
+  end
+
+  defp sanitize(value) do
+    Bugsnag.Sanitizer.sanitize(value, Application.get_env(:bugsnag, :sanitizers, []))
+  rescue
+    e ->
+      if Application.get_env(:bugsnag, :log_unsanitized_values_on_sanitization_exceptions, false) do
+        Logger.warn(
+          "Bugsnag Sanitizer failed to sanitize value #{value}, because of the following error #{
+            IO.inspect(e)
+          }"
+        )
+
+        value
+      else
+        Logger.warn(
+          "Bugsnag Sanitizer failed to sanitize a value, add `log_unsanitized_values_on_sanitization_exceptions: true` to bugsnag config in order to see values in logs"
+        )
+
+        "[CENSORED DUE TO SANITIZER EXCEPTION]"
+      end
   end
 end
