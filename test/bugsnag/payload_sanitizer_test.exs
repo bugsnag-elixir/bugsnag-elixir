@@ -5,10 +5,28 @@ defmodule Bugsnag.PayloadSanitizerTest do
 
   @moduletag :capture_log
 
+  test "it sanitizes an error with a secret value" do
+    Application.put_env(:bugsnag, :sanitizers, [&Regex.replace(~r/fail/, &1, "pass")])
+
+    failure = fn ->
+      try do
+        raise "123fail123"
+      rescue
+        exception -> [exception, System.stacktrace(), []]
+      end
+    end
+
+    %{
+      events: [
+        %{exceptions: [%{message: msg}]} | _
+      ]
+    } = apply(Payload, :new, failure.())
+
+    assert msg == "123pass123"
+  end
+
   test "it sanitizes the error message" do
-    Application.put_env(:bugsnag, :sanitizers, [
-      fn string -> Regex.replace(~r/fail/, string, "pass") end
-    ])
+    Application.put_env(:bugsnag, :sanitizers, [&Regex.replace(~r/fail/, &1, "pass")])
 
     %{
       events: [
@@ -20,9 +38,7 @@ defmodule Bugsnag.PayloadSanitizerTest do
   end
 
   test "it sanitizes the mfa from the error report" do
-    Application.put_env(:bugsnag, :sanitizers, [
-      fn string -> Regex.replace(~r/fail/, string, "pass") end
-    ])
+    Application.put_env(:bugsnag, :sanitizers, [&Regex.replace(~r/fail/, &1, "pass")])
 
     %{
       events: [
@@ -52,7 +68,8 @@ defmodule Bugsnag.PayloadSanitizerTest do
       fn _ -> raise "error" end
     ])
 
-    assert capture_log(fn -> apply(Payload, :new, get_problem("this is a [fail]")) end) =~ "Bugsnag Sanitizer failed to sanitize a value"
+    assert capture_log(fn -> apply(Payload, :new, get_problem("this is a [fail]")) end) =~
+             "Bugsnag Sanitizer failed to sanitize a value"
   end
 
   def get_problem(args, options \\ []) do
