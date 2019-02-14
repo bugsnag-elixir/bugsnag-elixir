@@ -161,7 +161,12 @@ defmodule Bugsnag.Payload do
   end
 
   defp sanitize(value) do
-    Bugsnag.Sanitizer.sanitize(value, Application.get_env(:bugsnag, :sanitizers, []))
+    sanitizer = Application.get_env(:bugsnag, :sanitizer)
+    if sanitizer do
+      sanitizer.(value)
+    else
+      value
+    end
   rescue
     _ ->
       Logger.warn("Bugsnag Sanitizer failed to sanitize a value")

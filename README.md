@@ -79,7 +79,7 @@ config :bugsnag,
   hostname: {:system, "HOST", "unknown"},
   app_version: Mix.Project.config[:version],
   in_project: "lib/my_app_name"
-  sanitizers: [&Regex.replace(~r/unclean/, &1, "clean")]
+  sanitizer: &Regex.replace(~r/unclean/, &1, "clean")
 ```
 
 See below for explanations of each option, including some options not used here.
@@ -126,16 +126,16 @@ Sets the default application type for reported errors.
 
 Sets the default application version for reported errors.
 
-### Sanitizers
+### Sanitizer
 
-**Default:** `[]`
+**Default:** `nil`
 
-Sets a list of functions to be applied over contents of stack traces.
+A function to be applied over contents of stack traces.
 
 Example
 
 ```
-config :bugsnag, sanitizers: [&Regex.replace(~r/fail/, &1, "pass")]
+config :bugsnag, sanitizer: &Regex.replace(~r/fail/, &1, "pass")
 ```
 
 ```
@@ -147,11 +147,7 @@ Produces the failure message
 123pass123
 ```
 
-If a sanitizer function throws an exception while running, it will log out and return the string
-
-```
-[CENSORED DUE TO SANITIZER EXCEPTION]
-```
+If a sanitizer function throws an exception while running, it will log out a warning and return the string `[CENSORED DUE TO SANITIZER EXCEPTION]`
 
 ### `in_project`
 
