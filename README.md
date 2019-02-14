@@ -78,7 +78,7 @@ config :bugsnag,
   notify_release_stages: ["staging", "production"],
   hostname: {:system, "HOST", "unknown"},
   app_version: Mix.Project.config[:version],
-  in_project: "lib/my_app_name"
+  in_project: "lib/my_app_name",
   sanitizer: &Regex.replace(~r/unclean/, &1, "clean")
 ```
 
