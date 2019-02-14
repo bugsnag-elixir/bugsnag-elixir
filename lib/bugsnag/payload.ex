@@ -162,6 +162,7 @@ defmodule Bugsnag.Payload do
 
   defp sanitize(value) do
     sanitizer = Application.get_env(:bugsnag, :sanitizer)
+
     if sanitizer do
       sanitizer.(value)
     else
