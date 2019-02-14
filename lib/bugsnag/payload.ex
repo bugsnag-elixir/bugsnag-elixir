@@ -163,21 +163,9 @@ defmodule Bugsnag.Payload do
   defp sanitize(value) do
     Bugsnag.Sanitizer.sanitize(value, Application.get_env(:bugsnag, :sanitizers, []))
   rescue
-    e ->
-      if Application.get_env(:bugsnag, :log_unsanitized_values_on_sanitization_exceptions, false) do
-        Logger.warn(
-          "Bugsnag Sanitizer failed to sanitize value #{value}, because of the following error #{
-            IO.inspect(e)
-          }"
-        )
+    _ ->
+      Logger.warn("Bugsnag Sanitizer failed to sanitize a value")
 
-        value
-      else
-        Logger.warn(
-          "Bugsnag Sanitizer failed to sanitize a value, add `log_unsanitized_values_on_sanitization_exceptions: true` to bugsnag config in order to see values in logs"
-        )
-
-        "[CENSORED DUE TO SANITIZER EXCEPTION]"
-      end
+      "[CENSORED DUE TO SANITIZER EXCEPTION]"
   end
 end
