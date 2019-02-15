@@ -79,7 +79,7 @@ config :bugsnag,
   hostname: {:system, "HOST", "unknown"},
   app_version: Mix.Project.config[:version],
   in_project: "lib/my_app_name",
-  sanitizer: &Regex.replace(~r/unclean/, &1, "clean")
+  sanitizer: {MyModule, :my_function}
 ```
 
 See below for explanations of each option, including some options not used here.
@@ -134,8 +134,14 @@ A function to be applied over contents of stack traces.
 
 Example
 
-```
-config :bugsnag, sanitizer: &Regex.replace(~r/fail/, &1, "pass")
+```elixir
+defmodule MyModule do
+  def my_func(word) do
+    Regex.replace(~r/fail/, word, "pass")
+  end
+end
+
+config :bugsnag, sanitizer: {MyModule, :my_func}
 ```
 
 ```
