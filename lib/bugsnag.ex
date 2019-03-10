@@ -62,7 +62,7 @@ defmodule Bugsnag do
     if should_notify() do
       if Application.get_env(:bugsnag, :api_key) do
         Payload.new(exception, stacktrace, options)
-        |> Poison.encode!()
+        |> Jason.encode!()
         |> send_notification
         |> case do
           {:ok, %{status_code: 200}} -> :ok
