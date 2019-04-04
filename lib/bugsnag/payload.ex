@@ -1,4 +1,6 @@
 defmodule Bugsnag.Payload do
+  require Logger
+
   @notifier_info %{
     name: "Bugsnag Elixir",
     version: Bugsnag.Mixfile.project()[:version],
@@ -48,7 +50,7 @@ defmodule Bugsnag.Payload do
     Map.put(event, :exceptions, [
       %{
         errorClass: exception.__struct__,
-        message: Exception.message(exception),
+        message: sanitize(Exception.message(exception)),
         stacktrace: format_stacktrace(stacktrace, options)
       }
     ])
@@ -110,7 +112,7 @@ defmodule Bugsnag.Payload do
           file: "unknown",
           lineNumber: 0,
           inProject: false,
-          method: Exception.format_mfa(module, function, args)
+          method: sanitize(Exception.format_mfa(module, function, args))
         }
 
       {module, function, args, [file: file, line: line_number]} ->
@@ -120,7 +122,7 @@ defmodule Bugsnag.Payload do
           file: file,
           lineNumber: line_number,
           inProject: in_project_fn.({module, function, args, file}),
-          method: Exception.format_mfa(module, function, args),
+          method: sanitize(Exception.format_mfa(module, function, args)),
           code: get_file_contents(file, line_number)
         }
     end)
@@ -156,5 +158,21 @@ defmodule Bugsnag.Payload do
       |> Enum.slice(if(line_number - 4 > 0, do: line_number - 4, else: 0), 7)
       |> Enum.into(%{})
     end
+  end
+
+  defp sanitize(value) do
+    sanitizer = Application.get_env(:bugsnag, :sanitizer)
+
+    if sanitizer do
+      {module, function} = sanitizer
+      apply(module, function, [value])
+    else
+      value
+    end
+  rescue
+    _ ->
+      Logger.warn("Bugsnag Sanitizer failed to sanitize a value")
+
+      "[CENSORED DUE TO SANITIZER EXCEPTION]"
   end
 end
