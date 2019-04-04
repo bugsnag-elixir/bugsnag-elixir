@@ -7,6 +7,7 @@ defmodule Bugsnag.Payload do
     url: Bugsnag.Mixfile.project()[:package][:links][:github]
   }
 
+  @derive Jason.Encoder
   defstruct api_key: nil, notifier: @notifier_info, events: nil
 
   def new(exception, stacktrace, options) when is_map(options) do
