@@ -20,6 +20,7 @@ Capture exceptions and send them to the [Bugsnag](https://www.bugsnag.com/) API!
   - [`in_project`](#in_project)
   - [`endpoint_url`](#endpoint_url)
   - [`use_logger`](#use_logger)
+  - [`exception_filter`](#exception_filter)
 - [Usage](#usage)
   - [Manual Reporting](#manual-reporting)
   - [Reporting Options](#reporting-options)
@@ -211,6 +212,20 @@ Allows sending reports to a different URL (e.g. if using Bugsnag On-premise).
 Controls whether the default Erlang `:error_logger` handler is added on
 application startup. This will automatically report most process crashes.
 
+### `exception_filter`
+
+**Default:** `nil`
+
+Optional module that allows filtering of log messages. For example
+```Elixir
+defmodule MyApp.ExceptionFilter do
+  def should_notify({{%{plug_status: resp_status},_},_}, _stacktrace) when is_integer(resp_status) do
+    #structure used by cowboy 2.0
+    resp_status < 400 or resp_status >= 500
+  end
+  def should_notify(_e, _s), do: true
+end
+```
 
 ## Usage
 

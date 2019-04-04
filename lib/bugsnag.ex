@@ -28,7 +28,7 @@ defmodule Bugsnag do
       Application.put_env(:bugsnag, k, v)
     end)
 
-    if !config[:api_key] and should_notify() do
+    if !config[:api_key] and reported_stage() do
       Logger.warn("Bugsnag api_key is not configured, errors will not be reported")
     end
 
@@ -59,7 +59,7 @@ defmodule Bugsnag do
   def sync_report(exception, options \\ []) do
     stacktrace = options[:stacktrace] || System.stacktrace()
 
-    if should_notify() do
+    if should_notify(exception, stacktrace) do
       if Application.get_env(:bugsnag, :api_key) do
         Payload.new(exception, stacktrace, options)
         |> Poison.encode!()
@@ -83,11 +83,14 @@ defmodule Bugsnag do
     HTTPoison.post(notify_url(), body, @request_headers)
   end
 
-  def should_notify do
+  defp reported_stage() do
     release_stage = Application.get_env(:bugsnag, :release_stage)
     notify_stages = Application.get_env(:bugsnag, :notify_release_stages)
-
     release_stage && is_list(notify_stages) && Enum.member?(notify_stages, release_stage)
+  end
+
+  def should_notify(exception, stacktrace) do
+    reported_stage() && test_filter(exception_filter(), exception, stacktrace)
   end
 
   defp default_config do
@@ -119,5 +122,21 @@ defmodule Bugsnag do
 
   defp notify_url do
     Application.get_env(:bugsnag, :endpoint_url, @notify_url)
+  end
+
+  defp exception_filter() do
+    Application.get_env(:bugsnag, :exception_filter)
+  end
+
+  defp test_filter(nil, _, _), do: true
+
+  defp test_filter(module, exception, stacktrace) do
+    try do
+      module.should_notify(exception, stacktrace)
+    rescue
+      _ ->
+        # Swallowing error in order to avoid exception loops
+        true
+    end
   end
 end
