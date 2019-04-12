@@ -17,10 +17,12 @@ Capture exceptions and send them to the [Bugsnag](https://www.bugsnag.com/) API!
   - [`hostname`](#hostname)
   - [`app_type`](#app_type)
   - [`app_version`](#app_version)
+  - [`sanitizer`](#sanitizer)
   - [`in_project`](#in_project)
   - [`endpoint_url`](#endpoint_url)
   - [`use_logger`](#use_logger)
   - [`exception_filter`](#exception_filter)
+  - [`json_library`](#json_library)
 - [Usage](#usage)
   - [Manual Reporting](#manual-reporting)
   - [Reporting Options](#reporting-options)
@@ -33,7 +35,12 @@ Capture exceptions and send them to the [Bugsnag](https://www.bugsnag.com/) API!
 ```elixir
 # mix.exs
 defp deps do
-  [{:bugsnag, "~> 1.7.0"}]
+  [
+    {:bugsnag, "~> 1.7.0"},
+    # pick ONE of these JSON encoding libraries:
+    {:jason, "~> 1.0"},
+    {:posion, "~> 3.0"}
+  ]
 end
 ```
 
@@ -127,7 +134,7 @@ Sets the default application type for reported errors.
 
 Sets the default application version for reported errors.
 
-### Sanitizer
+### `sanitizer`
 
 **Default:** `nil`
 
@@ -226,6 +233,12 @@ defmodule MyApp.ExceptionFilter do
   def should_notify(_e, _s), do: true
 end
 ```
+
+### `json_library`
+
+**Default:** `Jason`
+
+The JSON encoding library.
 
 ## Usage
 

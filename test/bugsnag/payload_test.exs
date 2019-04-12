@@ -216,4 +216,25 @@ defmodule Bugsnag.PayloadTest do
       version: _
     } = get_payload().notifier
   end
+
+  for json_library <- [nil, Jason, Poison] do
+    desc = if json_library, do: inspect(json_library), else: "default JSON library"
+
+    test "it encodes `apiKey` using #{desc}" do
+      json_library = unquote(json_library)
+
+      if json_library do
+        Application.put_env(:bugsnag, :json_library, json_library)
+      else
+        Application.delete_env(:bugsnag, :json_library)
+      end
+
+      decoded_payload =
+        get_payload()
+        |> Payload.encode()
+        |> Bugsnag.json_library().decode!()
+
+      assert decoded_payload["apiKey"] == "FAKEKEY"
+    end
+  end
 end

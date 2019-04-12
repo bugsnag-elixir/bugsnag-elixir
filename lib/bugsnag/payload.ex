@@ -20,7 +20,7 @@ defmodule Bugsnag.Payload do
   end
 
   def encode(%__MODULE__{api_key: api_key, notifier: notifier, events: events}) do
-    Jason.encode!(%{apiKey: api_key, notifier: notifier, events: events})
+    Bugsnag.json_library().encode!(%{apiKey: api_key, notifier: notifier, events: events})
   end
 
   defp fetch_option(options, key, default \\ nil) do
