@@ -61,8 +61,9 @@ defmodule Bugsnag do
 
     if should_notify(exception, stacktrace) do
       if Application.get_env(:bugsnag, :api_key) do
-        Payload.new(exception, stacktrace, options)
-        |> Jason.encode!()
+        exception
+        |> Payload.new(stacktrace, options)
+        |> Payload.encode()
         |> send_notification
         |> case do
           {:ok, %{status_code: 200}} -> :ok

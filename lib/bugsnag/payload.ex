@@ -7,7 +7,6 @@ defmodule Bugsnag.Payload do
     url: Bugsnag.Mixfile.project()[:package][:links][:github]
   }
 
-  @derive Jason.Encoder
   defstruct api_key: nil, notifier: @notifier_info, events: nil
 
   def new(exception, stacktrace, options) when is_map(options) do
@@ -15,9 +14,13 @@ defmodule Bugsnag.Payload do
   end
 
   def new(exception, stacktrace, options) do
-    %__MODULE__{}
-    |> Map.put(:apiKey, fetch_option(options, :api_key))
+    __MODULE__
+    |> struct(api_key: fetch_option(options, :api_key))
     |> add_event(exception, stacktrace, options)
+  end
+
+  def encode(%__MODULE__{api_key: api_key, notifier: notifier, events: events}) do
+    Jason.encode!(%{apiKey: api_key, notifier: notifier, events: events})
   end
 
   defp fetch_option(options, key, default \\ nil) do

@@ -178,11 +178,11 @@ defmodule Bugsnag.PayloadTest do
   end
 
   test "it sets the API key if configured" do
-    assert "FAKEKEY" == get_payload().apiKey
+    assert "FAKEKEY" == get_payload().api_key
   end
 
   test "it sets the API key from options, even when configured" do
-    assert "anotherkey" == get_payload(api_key: "anotherkey").apiKey
+    assert "anotherkey" == get_payload(api_key: "anotherkey").api_key
   end
 
   test "is sets the device info if given" do
