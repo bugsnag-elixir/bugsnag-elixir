@@ -60,7 +60,9 @@ defmodule Bugsnag do
     stacktrace = options[:stacktrace] || System.stacktrace()
 
     if should_notify(exception, stacktrace) do
+      Logger.info("Now inside of sync_report grabbing the api key then should send")
       if Application.get_env(:bugsnag, :api_key) do
+        Logger.info("Composing and ending notification")
         Payload.new(exception, stacktrace, options)
         |> Jason.encode!()
         |> send_notification
