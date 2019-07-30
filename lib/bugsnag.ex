@@ -65,6 +65,7 @@ defmodule Bugsnag do
         Payload.new(exception, stacktrace, options)
         |> IO.inspect()
         |> Jason.encode!()
+        |> IO.inspect()
         |> send_notification
         |> case do
           {:ok, %{status_code: 200}} -> :ok
