@@ -63,7 +63,7 @@ defmodule Bugsnag do
       if Application.get_env(:bugsnag, :api_key) do
         Logger.info("Has Api key will attempt to send to bugsnag")
         Payload.new(exception, stacktrace, options)
-        |> Poison.encode!()
+        |> Jason.encode!()
         |> send_notification
         |> IO.inspect()
         |> case do
