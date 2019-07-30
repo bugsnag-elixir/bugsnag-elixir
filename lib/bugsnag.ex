@@ -58,14 +58,11 @@ defmodule Bugsnag do
   @doc "Report the exception and wait for the result. Returns `ok` or `{:error, reason}`."
   def sync_report(exception, options \\ []) do
     stacktrace = options[:stacktrace] || System.stacktrace()
-    Logger.info("in the sync_report function")
     if should_notify(exception, stacktrace) do
       if Application.get_env(:bugsnag, :api_key) do
         Logger.info("Has Api key will attempt to send to bugsnag")
         Payload.new(exception, stacktrace, options)
-        |> IO.inspect()
         |> Jason.encode!()
-        |> IO.inspect()
         |> send_notification
         |> case do
           {:ok, %{status_code: 200}} -> :ok
