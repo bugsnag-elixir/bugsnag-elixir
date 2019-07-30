@@ -8,7 +8,7 @@ defmodule Bugsnag.Payload do
   }
 
   @derive Jason.Encoder
-  defstruct apiKey: nil, notifier: @notifier_info, events: nil
+  defstruct api_key: nil, notifier: @notifier_info, events: nil
 
   def new(exception, stacktrace, options) when is_map(options) do
     new(exception, stacktrace, Map.to_list(options))
