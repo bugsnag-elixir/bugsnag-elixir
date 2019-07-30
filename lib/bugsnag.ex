@@ -58,7 +58,7 @@ defmodule Bugsnag do
   @doc "Report the exception and wait for the result. Returns `ok` or `{:error, reason}`."
   def sync_report(exception, options \\ []) do
     stacktrace = options[:stacktrace] || System.stacktrace()
-    
+  
     if should_notify(exception, stacktrace) do
       if Application.get_env(:bugsnag, :api_key) do
         Payload.new(exception, stacktrace, options)
