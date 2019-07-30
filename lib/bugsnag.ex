@@ -60,7 +60,6 @@ defmodule Bugsnag do
     stacktrace = options[:stacktrace] || System.stacktrace()
     if should_notify(exception, stacktrace) do
       if Application.get_env(:bugsnag, :api_key) do
-        Logger.info("Has Api key will attempt to send to bugsnag")
         Payload.new(exception, stacktrace, options)
         |> Jason.encode!()
         |> send_notification
