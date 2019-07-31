@@ -62,6 +62,7 @@ defmodule Bugsnag do
     if should_notify(exception, stacktrace) do
       if Application.get_env(:bugsnag, :api_key) do
         Payload.new(exception, stacktrace, options)
+        |> IO.inspect()
         |> Jason.encode!()
         |> send_notification
         |> case do
