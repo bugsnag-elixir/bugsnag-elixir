@@ -178,11 +178,11 @@ defmodule Bugsnag.PayloadTest do
   end
 
   test "it sets the API key if configured" do
-    assert "FAKEKEY" == get_payload().apiKey
+    assert "FAKEKEY" == get_payload().api_key
   end
 
   test "it sets the API key from options, even when configured" do
-    assert "anotherkey" == get_payload(api_key: "anotherkey").apiKey
+    assert "anotherkey" == get_payload(api_key: "anotherkey").api_key
   end
 
   test "is sets the device info if given" do
@@ -215,5 +215,26 @@ defmodule Bugsnag.PayloadTest do
       url: "https://github.com/jarednorman/bugsnag-elixir",
       version: _
     } = get_payload().notifier
+  end
+
+  for json_library <- [nil, Jason, Poison] do
+    desc = if json_library, do: inspect(json_library), else: "default JSON library"
+
+    test "it encodes `apiKey` using #{desc}" do
+      json_library = unquote(json_library)
+
+      if json_library do
+        Application.put_env(:bugsnag, :json_library, json_library)
+      else
+        Application.delete_env(:bugsnag, :json_library)
+      end
+
+      decoded_payload =
+        get_payload()
+        |> Payload.encode()
+        |> Bugsnag.json_library().decode!()
+
+      assert decoded_payload["apiKey"] == "FAKEKEY"
+    end
   end
 end

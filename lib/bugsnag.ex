@@ -51,6 +51,8 @@ defmodule Bugsnag do
     ])
   end
 
+  def json_library(), do: Application.get_env(:bugsnag, :json_library, Jason)
+
   defp add_stacktrace(options) do
     if options[:stacktrace], do: options, else: put_in(options[:stacktrace], System.stacktrace())
   end
@@ -61,8 +63,9 @@ defmodule Bugsnag do
 
     if should_notify(exception, stacktrace) do
       if Application.get_env(:bugsnag, :api_key) do
-        Payload.new(exception, stacktrace, options)
-        |> Jason.encode!()
+        exception
+        |> Payload.new(stacktrace, options)
+        |> Payload.encode()
         |> send_notification
         |> case do
           {:ok, %{status_code: 200}} -> :ok
