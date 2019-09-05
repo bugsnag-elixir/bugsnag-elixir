@@ -6,29 +6,33 @@ elixir:
     - 1.8
     - 1.9
 otp_release:
-    - 18
-    - 19
-    - 20
-    - 21
-    - 22
+    - 18.3
+    - 19.3
+    - 20.3
+    - 21.3
+    - 22.0
 
 matrix:
   exclude:
     - elixir: 1.5
-      otp_release: 21
+      otp_release: 21.3
     - elixir: 1.5
-      otp_release: 22
+      otp_release: 22.0
+
     - elixir: 1.6
-      otp_release: 21
+      otp_release: 21.3
     - elixir: 1.6
-      otp_release: 22
+      otp_release: 22.0
+
     - elixir: 1.7
-      otp_release: 18
+      otp_release: 18.3
+
     - elixir: 1.8
-      otp_release: 18
+      otp_release: 18.3
     - elixir: 1.8
-      otp_release: 19
+      otp_release: 19.3
+
     - elixir: 1.9
-      otp_release: 18
+      otp_release: 18.3
     - elixir: 1.9
-      otp_release: 19
+      otp_release: 19.3
