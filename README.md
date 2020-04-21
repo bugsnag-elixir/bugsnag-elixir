@@ -60,6 +60,32 @@ By default, the application adds an Erlang `:error_logger` handler on startup
 that will report most process crashes automatically. If you only want to report
 errors manually, this can be configured via the `use_logger` option (see below).
 
+### Umbrella apps
+
+To work with umbrella apps, it's necessary add `:bugsnag` as extra application
+in each application.
+
+```elixir
+# apps/my_awesome_umbrella_app/mix.exs
+defmodule MyAwesomeUmbrellaApp.MixProject do
+  # ...
+
+  defp extra_applications(:test), do: extra_applications(:default) ++ [:cowboy, :plug]
+  defp extra_applications(_), do: [:logger, :runtime_tools, :httpoison, :bugsnag]
+
+  # ...
+end
+
+# apps/my_awesome_umbrella_proxy/mix.exs
+defmodule MyAwesomeUmbrellaProxy.MixProject do
+  # ...
+
+  defp extra_applications(:test), do: extra_applications(:default) ++ [:cowboy, :plug]
+  defp extra_applications(_), do: [:logger, :runtime_tools, :httpoison, :bugsnag]
+
+  # ...
+end
+```
 
 ## Configuration
 
