@@ -1,31 +1,36 @@
-# Bugsnag Elixir [![Build Status](https://travis-ci.org/jarednorman/bugsnag-elixir.svg?branch=master)](https://travis-ci.org/jarednorman/bugsnag-elixir)
+# Bugsnag Elixir
+[![Build Status](https://travis-ci.org/jarednorman/bugsnag-elixir.svg?branch=master)](https://travis-ci.org/jarednorman/bugsnag-elixir)
 
 Capture exceptions and send them to the [Bugsnag](https://www.bugsnag.com/) API!
 
 🔗 See also: [Plugsnag], to snag exceptions in your Phoenix application.
 
-[Plugsnag]: https://github.com/jarednorman/plugsnag
+[Plugsnag]: https://github.com/bugsnag-elixir/plugsnag
 
 <!-- MarkdownTOC autolink="true" bracket="round" levels="1,2,3" -->
 
-- [Installation](#installation)
-- [Configuration](#configuration)
-  - [Example](#example)
-  - [`api_key`](#api_key)
-  - [`release_stage`](#release_stage)
-  - [`notify_release_stages`](#notify_release_stages)
-  - [`hostname`](#hostname)
-  - [`app_type`](#app_type)
-  - [`app_version`](#app_version)
-  - [`sanitizer`](#sanitizer)
-  - [`in_project`](#in_project)
-  - [`endpoint_url`](#endpoint_url)
-  - [`use_logger`](#use_logger)
-  - [`exception_filter`](#exception_filter)
-  - [`json_library`](#json_library)
-- [Usage](#usage)
-  - [Manual Reporting](#manual-reporting)
-  - [Reporting Options](#reporting-options)
+- [Bugsnag Elixir](#bugsnag-elixir)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
+    - [Example](#example)
+    - [`api_key`](#api_key)
+    - [`release_stage`](#release_stage)
+    - [`notify_release_stages`](#notify_release_stages)
+    - [`hostname`](#hostname)
+    - [`app_type`](#app_type)
+    - [`app_version`](#app_version)
+    - [`sanitizer`](#sanitizer)
+    - [`in_project`](#in_project)
+      - [String Matching](#string-matching)
+      - [Regex Matching](#regex-matching)
+      - [Custom Function](#custom-function)
+    - [`endpoint_url`](#endpoint_url)
+    - [`use_logger`](#use_logger)
+    - [`exception_filter`](#exception_filter)
+    - [`json_library`](#json_library)
+  - [Usage](#usage)
+    - [Manual Reporting](#manual-reporting)
+    - [Reporting Options](#reporting-options)
 
 <!-- /MarkdownTOC -->
 
@@ -39,7 +44,7 @@ defp deps do
     {:bugsnag, "~> 2.0.0"},
     # pick ONE of these JSON encoding libraries:
     {:jason, "~> 1.0"},
-    {:posion, "~> 3.0"}
+    {:poison, "~> 3.0"}
   ]
 end
 ```
@@ -302,7 +307,7 @@ The following options allow adding more data to the report:
   * `name` - Full name of the user
   * `email` - Email address of the user
 * `os_version` — Sets the reported OS version of the error
-* `stacktrace` — Allows passing in a stack trace, e.g. from `System.stacktrace`
+* `stacktrace` — Allows passing in a stack trace, e.g. from `__STACKTRACE__`
 * `metadata` - Map of arbitrary metadata to include with the report
 
 [See the Bugsnag docs][2] for more information on these fields.
