@@ -18,7 +18,7 @@ defmodule Bugsnag do
       end)
 
     if to_string(config[:use_logger]) == "true" do
-      :error_logger.add_report_handler(Bugsnag.Logger)
+      Logger.add_backend(Bugsnag.Logger)
     end
 
     # Update Application config with evaluated configuration
