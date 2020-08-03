@@ -212,7 +212,7 @@ defmodule Bugsnag.PayloadTest do
   test "it reports the notifier" do
     %{
       name: "Bugsnag Elixir",
-      url: "https://github.com/jarednorman/bugsnag-elixir",
+      url: "https://github.com/bugsnag-elixir/bugsnag-elixir",
       version: _
     } = get_payload().notifier
   end
