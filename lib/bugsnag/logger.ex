@@ -29,14 +29,8 @@ defmodule Bugsnag.Logger do
       end
     rescue
       ex ->
-        error_type =
-          Exception.normalize(:error, ex).__struct__
-          |> Atom.to_string()
-          |> String.replace(~r{\AElixir\.}, "")
-
-        reason = Exception.message(ex)
-
-        Logger.warn("Unable to notify Bugsnag #{error_type}: #{reason}")
+        error_message = Exception.format(:error, ex)
+        Logger.warn("Unable to notify Bugsnag. #{error_message}")
     end
 
     {:ok, state}

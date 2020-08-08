@@ -7,16 +7,14 @@ defmodule Bugsnag.LoggerTest do
 
   setup_all do
     :error_logger.add_report_handler(Bugsnag.Logger)
-
-    on_exit(fn ->
-      :error_logger.delete_report_handler(Bugsnag.Logger)
-    end)
-
     Application.put_env(:bugsnag, :release_stage, "test")
     Application.put_env(:bugsnag, :notify_release_stages, ["test"])
 
-    on_exit(fn -> Application.delete_env(:bugsnag, :release_stage) end)
-    on_exit(fn -> Application.delete_env(:bugsnag, :notify_release_stages) end)
+    on_exit(fn ->
+      :error_logger.delete_report_handler(Bugsnag.Logger)
+      Application.delete_env(:bugsnag, :release_stage)
+      Application.delete_env(:bugsnag, :notify_release_stages)
+    end)
   end
 
   test "logging a crash" do
@@ -111,5 +109,16 @@ defmodule Bugsnag.LoggerTest do
     assert :meck.called(HTTP, :post, [:_, :_, :_])
 
     :meck.unload(HTTP)
+  end
+
+  test "warns if error report format is invalid" do
+    event = {:error_report, :gl, {:pid, :type, [[error_info: :invalid]]}}
+
+    log_msg =
+      capture_log(fn ->
+        Bugsnag.Logger.handle_event(event, :state)
+      end)
+
+    assert log_msg =~ "Unable to notify Bugsnag. ** (CaseClauseError)"
   end
 end
