@@ -1,5 +1,7 @@
 # Bugsnag Elixir
-[![Build Status](https://travis-ci.org/jarednorman/bugsnag-elixir.svg?branch=master)](https://travis-ci.org/jarednorman/bugsnag-elixir)
+[![Elixir CI](https://github.com/bugsnag-elixir/bugsnag-elixir/workflows/Elixir%20CI/badge.svg)](https://github.com/bugsnag-elixir/bugsnag-elixir/actions)
+[![Bugsnag version](https://img.shields.io/hexpm/v/bugsnag.svg)](https://hex.pm/packages/bugsnag)
+[![Hex.pm](https://img.shields.io/hexpm/dt/bugsnag.svg)](https://hex.pm/packages/bugsnag)
 
 Capture exceptions and send them to the [Bugsnag](https://www.bugsnag.com/) API!
 
