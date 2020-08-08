@@ -5,7 +5,8 @@ defmodule Bugsnag.Mixfile do
     [
       app: :bugsnag,
       version: "2.0.0",
-      elixir: "~> 1.3",
+      elixir: "~> 1.6",
+      elixirc_paths: elixirc_paths(Mix.env()),
       package: package(),
       description: "An Elixir interface to the Bugsnag API.",
       deps: deps()
@@ -20,6 +21,9 @@ defmodule Bugsnag.Mixfile do
       links: %{github: "https://github.com/bugsnag-elixir/bugsnag-elixir"}
     ]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "web", "test/support"]
+  defp elixirc_paths(_), do: ["lib", "web"]
 
   def application do
     [applications: [:httpoison, :logger], mod: {Bugsnag, []}]
