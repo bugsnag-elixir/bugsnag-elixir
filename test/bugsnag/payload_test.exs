@@ -6,7 +6,7 @@ defmodule Bugsnag.PayloadTest do
     try do
       # If the following line is not on line 9 then tests will start failing.
       # You've been warned!
-      Harbour.cats(3)
+      Module.concat(Elixir, "Harbour").cats(3)
     rescue
       exception -> [exception, System.stacktrace()]
     end
@@ -77,7 +77,7 @@ defmodule Bugsnag.PayloadTest do
   test "it generates correct stacktraces when the method arguments are in place of arity" do
     {exception, stacktrace} =
       try do
-        Fart.poo(:butts, 1, "foo\n")
+        Module.concat(Elixir, "Movies").watch(:thor, 3, "ragnarok\n")
       rescue
         exception -> {exception, System.stacktrace()}
       end
@@ -86,7 +86,7 @@ defmodule Bugsnag.PayloadTest do
       Payload.new(exception, stacktrace, [])
 
     [
-      %{file: "unknown", lineNumber: 0, method: "Fart.poo(:butts, 1, \"foo\\n\")"},
+      %{file: "unknown", lineNumber: 0, method: "Movies.watch(:thor, 3, \"ragnarok\\n\")"},
       %{file: "test/bugsnag/payload_test.exs", lineNumber: _, method: _, code: _} | _
     ] = stacktrace
   end
