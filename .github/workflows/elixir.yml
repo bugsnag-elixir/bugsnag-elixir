@@ -46,9 +46,9 @@ jobs:
         mix local.hex --force
         mix deps.get
 
-    # - name: Check format
-    #   if: (!startsWith(matrix.elixir, '1.6') && !startsWith(matrix.elixir, '1.7'))
-    #   run: mix format --check-formatted
+    - name: Check format
+      if: (!startsWith(matrix.elixir, '1.6') && !startsWith(matrix.elixir, '1.7'))
+      run: mix format --check-formatted
 
     - name: Run tests
       run: mix test
