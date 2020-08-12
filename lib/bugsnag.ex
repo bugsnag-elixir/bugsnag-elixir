@@ -2,11 +2,6 @@ defmodule Bugsnag do
   use Application
   require Logger
 
-  alias Bugsnag.Payload
-
-  @notify_url "https://notify.bugsnag.com"
-  @request_headers [{"Content-Type", "application/json"}]
-
   def start(_type, _args) do
     config =
       default_config()
@@ -27,7 +22,7 @@ defmodule Bugsnag do
       Application.put_env(:bugsnag, k, v)
     end)
 
-    if !config[:api_key] and reported_stage() do
+    if !config[:api_key] and reported_stage?() do
       Logger.warn("Bugsnag api_key is not configured, errors will not be reported")
     end
 
@@ -42,66 +37,21 @@ defmodule Bugsnag do
   Report the exception without waiting for the result of the Bugsnag API call.
   (I.e. this might fail silently)
   """
-  def report(exception, options \\ []) do
-    Task.Supervisor.start_child(
-      Bugsnag.TaskSupervisor,
-      __MODULE__,
-      :sync_report,
-      [
-        exception,
-        add_stacktrace(options)
-      ],
-      restart: :transient
-    )
-  end
+  defdelegate report(expection, opts \\ []), to: Bugsnag.Reporter
 
-  defp add_stacktrace(options) do
-    if options[:stacktrace], do: options, else: put_in(options[:stacktrace], System.stacktrace())
-  end
+  @doc "Report the exception and wait for the result. Returns `:ok` or `{:error, reason}`."
+  defdelegate sync_report(exception, opts \\ []), to: Bugsnag.Reporter
 
-  @doc "Report the exception and wait for the result. Returns `ok` or `{:error, reason}`."
-  def sync_report(exception, options \\ []) do
-    stacktrace = options[:stacktrace] || System.stacktrace()
-
-    if should_notify(exception, stacktrace) do
-      if Application.get_env(:bugsnag, :api_key) do
-        exception
-        |> Payload.new(stacktrace, options)
-        |> Payload.encode()
-        |> send_notification
-        |> case do
-          {:ok, %{status_code: 200}} -> :ok
-          {:ok, %{status_code: other}} -> {:error, "status_#{other}"}
-          {:error, %{reason: reason}} -> {:error, reason}
-          _ -> {:error, :unknown}
-        end
-      else
-        Logger.warn("Bugsnag api_key is not configured, error not reported")
-        {:error, %{reason: "API key is not configured"}}
-      end
-    else
-      {:ok, :not_sent}
-    end
-  end
-
-  defp send_notification(body) do
-    HTTPoison.post(notify_url(), body, @request_headers)
-  end
-
-  defp reported_stage() do
+  defp reported_stage?() do
     release_stage = Application.get_env(:bugsnag, :release_stage)
     notify_stages = Application.get_env(:bugsnag, :notify_release_stages)
     release_stage && is_list(notify_stages) && Enum.member?(notify_stages, release_stage)
   end
 
-  def should_notify(exception, stacktrace) do
-    reported_stage() && test_filter(exception_filter(), exception, stacktrace)
-  end
-
   defp default_config do
     [
       api_key: {:system, "BUGSNAG_API_KEY", nil},
-      endpoint_url: {:system, "BUGSNAG_ENDPOINT_URL", @notify_url},
+      endpoint_url: {:system, "BUGSNAG_ENDPOINT_URL", "https://notify.bugsnag.com"},
       use_logger: {:system, "BUGSNAG_USE_LOGGER", true},
       release_stage: {:system, "BUGSNAG_RELEASE_STAGE", "production"},
       notify_release_stages: {:system, "BUGSNAG_NOTIFY_RELEASE_STAGES", ["production"]},
@@ -124,24 +74,4 @@ defmodule Bugsnag do
   end
 
   defp eval_config(value), do: value
-
-  defp notify_url do
-    Application.get_env(:bugsnag, :endpoint_url, @notify_url)
-  end
-
-  defp exception_filter() do
-    Application.get_env(:bugsnag, :exception_filter)
-  end
-
-  defp test_filter(nil, _, _), do: true
-
-  defp test_filter(module, exception, stacktrace) do
-    try do
-      module.should_notify(exception, stacktrace)
-    rescue
-      _ ->
-        # Swallowing error in order to avoid exception loops
-        true
-    end
-  end
 end
