@@ -3,26 +3,17 @@ defmodule Bugsnag do
   require Logger
 
   def start(_type, _args) do
-    config =
-      default_config()
-      |> Keyword.merge(Application.get_all_env(:bugsnag))
-      |> Enum.map(fn {k, v} -> {k, eval_config(v)} end)
-      |> Keyword.update!(:notify_release_stages, fn stages ->
-        if(is_binary(stages), do: String.split(stages, ","), else: stages)
-      end)
+    config = load_config()
 
     if to_string(config[:use_logger]) == "true" do
       :error_logger.add_report_handler(Bugsnag.Logger)
     end
 
     # Update Application config with evaluated configuration
-    # It's needed for use in Bugsnag.Payload, could be removed
-    # by using GenServer instead of this kind of app.
-    Enum.each(config, fn {k, v} ->
-      Application.put_env(:bugsnag, k, v)
-    end)
+    # It's needed for use in Bugsnag.Payload
+    Application.put_all_env(bugsnag: config)
 
-    if !config[:api_key] and reported_stage?() do
+    if is_nil(config[:api_key]) and reported_stage?() do
       Logger.warn("Bugsnag api_key is not configured, errors will not be reported")
     end
 
@@ -35,9 +26,9 @@ defmodule Bugsnag do
 
   @doc """
   Report the exception without waiting for the result of the Bugsnag API call.
-  (I.e. this might fail silently)
-  """
 
+  (i.e. this might fail silently)
+  """
   @spec report(exception :: term(), opts :: list()) :: :ok | {:error, :cannot_start_task}
   defdelegate report(exception, opts \\ []), to: Bugsnag.Reporter
 
@@ -49,6 +40,15 @@ defmodule Bugsnag do
     release_stage = Application.get_env(:bugsnag, :release_stage)
     notify_stages = Application.get_env(:bugsnag, :notify_release_stages)
     release_stage && is_list(notify_stages) && Enum.member?(notify_stages, release_stage)
+  end
+
+  defp load_config do
+    default_config()
+    |> Keyword.merge(Application.get_all_env(:bugsnag))
+    |> Enum.map(fn {k, v} -> {k, eval_config(v)} end)
+    |> Keyword.update!(:notify_release_stages, fn stages ->
+      if(is_binary(stages), do: String.split(stages, ","), else: stages)
+    end)
   end
 
   defp default_config do
