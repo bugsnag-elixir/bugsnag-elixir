@@ -1,6 +1,5 @@
 defmodule Bugsnag do
   use Application
-  import Supervisor.Spec
   require Logger
 
   alias Bugsnag.Payload
@@ -33,11 +32,10 @@ defmodule Bugsnag do
     end
 
     children = [
-      supervisor(Task.Supervisor, [[name: Bugsnag.TaskSupervisor]])
+      {Task.Supervisor, name: Bugsnag.TaskSupervisor}
     ]
 
-    opts = [strategy: :one_for_one, name: Bugsnag.Supervisor]
-    Supervisor.start_link(children, opts)
+    Supervisor.start_link(children, strategy: :one_for_one, name: Bugsnag.Supervisor)
   end
 
   @doc """
