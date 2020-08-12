@@ -11,7 +11,9 @@ defmodule Bugsnag do
 
     # Update Application config with evaluated configuration
     # It's needed for use in Bugsnag.Payload
-    Application.put_all_env(bugsnag: config)
+    Enum.each(config, fn {k, v} ->
+      Application.put_env(:bugsnag, k, v)
+    end)
 
     if is_nil(config[:api_key]) and reported_stage?() do
       Logger.warn("Bugsnag api_key is not configured, errors will not be reported")
