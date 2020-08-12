@@ -37,9 +37,12 @@ defmodule Bugsnag do
   Report the exception without waiting for the result of the Bugsnag API call.
   (I.e. this might fail silently)
   """
-  defdelegate report(expection, opts \\ []), to: Bugsnag.Reporter
+
+  @spec report(exception :: term(), opts :: list()) :: :ok | {:error, :cannot_start_task}
+  defdelegate report(exception, opts \\ []), to: Bugsnag.Reporter
 
   @doc "Report the exception and wait for the result. Returns `:ok` or `{:error, reason}`."
+  @spec sync_report(exception :: term(), opts :: list()) :: :ok | {:error, reason :: term()}
   defdelegate sync_report(exception, opts \\ []), to: Bugsnag.Reporter
 
   defp reported_stage?() do

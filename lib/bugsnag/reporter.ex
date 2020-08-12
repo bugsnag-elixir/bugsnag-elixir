@@ -11,19 +11,24 @@ defmodule Bugsnag.Reporter do
   Report the exception without waiting for the result of the Bugsnag API call
   """
   def report(exception, options \\ []) do
-    Task.Supervisor.start_child(
-      Bugsnag.TaskSupervisor,
-      __MODULE__,
-      :sync_report,
-      [
-        exception,
-        add_stacktrace(options)
-      ],
-      restart: :transient
-    )
+    start_task =
+      Task.Supervisor.start_child(
+        Bugsnag.TaskSupervisor,
+        __MODULE__,
+        :sync_report,
+        [
+          exception,
+          add_stacktrace(options)
+        ],
+        restart: :transient
+      )
+
+    case start_task do
+      {:ok, _pid} -> :ok
+      _otherwise -> {:error, :cannot_start_task}
+    end
   end
 
-  @doc "Report the exception and wait for the result. Returns `ok` or `{:error, reason}`."
   def sync_report(exception, options \\ []) do
     stacktrace = options[:stacktrace] || System.stacktrace()
 
