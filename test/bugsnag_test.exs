@@ -147,10 +147,4 @@ defmodule BugsnagTest do
 
     assert :ok = Bugsnag.sync_report(RuntimeError.exception("some_error"))
   end
-
-  test "uses Jason as JSON library by default" do
-    Application.delete_env(:bugsnag, :json_library)
-
-    assert Bugsnag.json_library() == Jason
-  end
 end

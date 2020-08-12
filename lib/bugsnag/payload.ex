@@ -20,8 +20,10 @@ defmodule Bugsnag.Payload do
   end
 
   def encode(%__MODULE__{api_key: api_key, notifier: notifier, events: events}) do
-    Bugsnag.json_library().encode!(%{apiKey: api_key, notifier: notifier, events: events})
+    json_library().encode!(%{apiKey: api_key, notifier: notifier, events: events})
   end
+
+  defp json_library, do: Application.get_env(:bugsnag, :json_library, Jason)
 
   defp fetch_option(options, key, default \\ nil) do
     Keyword.get(options, key, Application.get_env(:bugsnag, key, default))

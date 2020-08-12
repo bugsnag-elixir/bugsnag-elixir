@@ -57,8 +57,6 @@ defmodule Bugsnag do
     )
   end
 
-  def json_library(), do: Application.get_env(:bugsnag, :json_library, Jason)
-
   defp add_stacktrace(options) do
     if options[:stacktrace], do: options, else: put_in(options[:stacktrace], System.stacktrace())
   end
