@@ -79,7 +79,7 @@ defmodule Bugsnag.PayloadSanitizerTest do
   end
 
   def get_problem(args, options \\ []) do
-    Harbour.cats(args)
+    Module.concat(Elixir, "Harbour").cats(args)
   rescue
     exception -> [exception, System.stacktrace(), options]
   end

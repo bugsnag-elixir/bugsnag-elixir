@@ -76,7 +76,7 @@ defmodule Bugsnag.PayloadTest do
   test "it generates correct stacktraces when the method arguments are in place of arity" do
     {exception, stacktrace} =
       try do
-        Fart.poo(:butts, 1, "foo\n")
+        Module.concat(Elixir, "Movies").watch(:thor, 3, "ragnarok\n")
       rescue
         exception -> {exception, System.stacktrace()}
       end
@@ -85,7 +85,7 @@ defmodule Bugsnag.PayloadTest do
       Payload.new(exception, stacktrace, [])
 
     [
-      %{file: _, lineNumber: _, method: "Fart.poo(:butts, 1, \"foo\\n\")"},
+      %{file: _, lineNumber: _, method: "Movies.watch(:thor, 3, \"ragnarok\\n\")"},
       %{file: "test/bugsnag/payload_test.exs", lineNumber: _, method: _, code: _} | _
     ] = stacktrace
   end
@@ -94,7 +94,7 @@ defmodule Bugsnag.PayloadTest do
   test "location for an undefined function is same as caller" do
     {exception, stacktrace} =
       try do
-        Payload.non_existent_func()
+        Module.concat(Elixir, "Bugsnag.Payload").non_existent_func()
       rescue
         exception -> {exception, System.stacktrace()}
       end
@@ -193,11 +193,11 @@ defmodule Bugsnag.PayloadTest do
   end
 
   test "it sets the API key if configured" do
-    assert "FAKEKEY" == get_payload().apiKey
+    assert "FAKEKEY" == get_payload().api_key
   end
 
   test "it sets the API key from options, even when configured" do
-    assert "anotherkey" == get_payload(api_key: "anotherkey").apiKey
+    assert "anotherkey" == get_payload(api_key: "anotherkey").api_key
   end
 
   test "is sets the device info if given" do
@@ -227,8 +227,29 @@ defmodule Bugsnag.PayloadTest do
   test "it reports the notifier" do
     %{
       name: "Bugsnag Elixir",
-      url: "https://github.com/jarednorman/bugsnag-elixir",
+      url: "https://github.com/bugsnag-elixir/bugsnag-elixir",
       version: _
     } = get_payload().notifier
+  end
+
+  for json_library <- [nil, Jason, Poison] do
+    desc = if json_library, do: inspect(json_library), else: "default JSON library"
+
+    test "it encodes `apiKey` using #{desc}" do
+      json_library = unquote(json_library)
+
+      if json_library do
+        Application.put_env(:bugsnag, :json_library, json_library)
+      else
+        Application.delete_env(:bugsnag, :json_library)
+      end
+
+      decoded_payload =
+        get_payload()
+        |> Payload.encode()
+        |> Jason.decode!()
+
+      assert decoded_payload["apiKey"] == "FAKEKEY"
+    end
   end
 end

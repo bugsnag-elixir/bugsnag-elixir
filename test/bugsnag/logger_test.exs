@@ -2,21 +2,28 @@ defmodule Bugsnag.LoggerTest do
   use ExUnit.Case
 
   import ExUnit.CaptureLog
-
   alias HTTPoison, as: HTTP
 
   setup_all do
     :error_logger.add_report_handler(Bugsnag.Logger)
-
-    on_exit(fn ->
-      :error_logger.delete_report_handler(Bugsnag.Logger)
-    end)
-
     Application.put_env(:bugsnag, :release_stage, "test")
     Application.put_env(:bugsnag, :notify_release_stages, ["test"])
 
-    on_exit(fn -> Application.delete_env(:bugsnag, :release_stage) end)
-    on_exit(fn -> Application.delete_env(:bugsnag, :notify_release_stages) end)
+    on_exit(fn ->
+      :error_logger.delete_report_handler(Bugsnag.Logger)
+      Application.delete_env(:bugsnag, :release_stage)
+      Application.delete_env(:bugsnag, :notify_release_stages)
+    end)
+  end
+
+  setup do
+    :meck.new(HTTP, [:passthrough])
+
+    on_exit(fn ->
+      :meck.unload()
+    end)
+
+    :ok
   end
 
   test "logging a crash" do
@@ -29,7 +36,6 @@ defmodule Bugsnag.LoggerTest do
     :timer.sleep(250)
 
     assert :meck.called(HTTP, :post, [:_, :_, :_])
-    :meck.unload(HTTP)
   end
 
   test "crashes do not cause recursive logging" do
@@ -44,26 +50,20 @@ defmodule Bugsnag.LoggerTest do
 
     assert log_msg =~ "[[error_info: {:error, %RuntimeError{message: \"Oops\"}, []}], []]"
     assert :meck.called(HTTP, :post, [:_, :_, :_])
-
-    :meck.unload(HTTP)
   end
 
   test "log levels lower than :error_report are ignored" do
     message_types = [:info_msg, :info_report, :warning_msg, :error_msg]
+    :meck.expect(HTTP, :post, fn _ex, _c, _s -> %HTTP.Response{} end)
 
     Enum.each(message_types, fn type ->
-      log_msg =
-        capture_log(fn ->
-          :meck.expect(HTTP, :post, fn _ex, _c, _s -> %HTTP.Response{} end)
-          apply(:error_logger, type, ["Ignore me"])
-          :timer.sleep(250)
-          refute :meck.called(HTTP, :post, [:_, :_, :_])
-        end)
-
-      assert log_msg =~ "Ignore me"
+      assert capture_log(fn ->
+               apply(:error_logger, type, ["Ignore me"])
+             end) =~ "Ignore me"
     end)
 
-    :meck.unload(HTTP)
+    :timer.sleep(250)
+    refute :meck.called(HTTP, :post, [:_, :_, :_])
   end
 
   test "logging exceptions from special processes" do
@@ -76,7 +76,6 @@ defmodule Bugsnag.LoggerTest do
     :timer.sleep(250)
 
     assert :meck.called(HTTP, :post, [:_, :_, :_])
-    :meck.unload(HTTP)
   end
 
   test "logging exceptions from Tasks" do
@@ -90,8 +89,6 @@ defmodule Bugsnag.LoggerTest do
 
     assert log_msg =~ "(ArgumentError) argument error"
     assert :meck.called(HTTP, :post, [:_, :_, :_])
-
-    :meck.unload(HTTP)
   end
 
   test "logging exceptions from GenServers" do
@@ -109,7 +106,16 @@ defmodule Bugsnag.LoggerTest do
     # versions. It feels like we shouldn't need to assert on the log message but...
     assert log_msg =~ "(stop) bad cast: :fail" || log_msg =~ "but no handle_cast"
     assert :meck.called(HTTP, :post, [:_, :_, :_])
+  end
 
-    :meck.unload(HTTP)
+  test "warns if error report format is invalid" do
+    event = {:error_report, :gl, {:pid, :type, [[error_info: :invalid]]}}
+
+    log_msg =
+      capture_log(fn ->
+        Bugsnag.Logger.handle_event(event, :state)
+      end)
+
+    assert log_msg =~ "Unable to notify Bugsnag. ** (CaseClauseError)"
   end
 end
