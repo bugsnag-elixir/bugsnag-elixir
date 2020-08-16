@@ -26,7 +26,10 @@ defmodule Bugsnag.Mixfile do
   defp elixirc_paths(_), do: ["lib", "web"]
 
   def application do
-    [applications: [:httpoison, :logger], mod: {Bugsnag, []}]
+    [
+      mod: {Bugsnag, []},
+      extra_applications: [:logger]
+    ]
   end
 
   defp deps do
