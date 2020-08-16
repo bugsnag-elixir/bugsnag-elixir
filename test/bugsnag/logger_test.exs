@@ -2,7 +2,7 @@ defmodule Bugsnag.LoggerTest do
   use ExUnit.Case
 
   import ExUnit.CaptureLog
-  alias HTTPoison, as: HTTP
+  alias HTTPoison
 
   setup_all do
     :error_logger.add_report_handler(Bugsnag.Logger)
@@ -17,7 +17,7 @@ defmodule Bugsnag.LoggerTest do
   end
 
   setup do
-    :meck.new(HTTP, [:passthrough])
+    :meck.new(HTTPoison, [:passthrough])
 
     on_exit(fn ->
       :meck.unload()
@@ -27,7 +27,7 @@ defmodule Bugsnag.LoggerTest do
   end
 
   test "logging a crash" do
-    :meck.expect(HTTP, :post, fn _ex, _c, _s -> %HTTP.Response{} end)
+    :meck.expect(HTTPoison, :post, fn _url, _body, _headers, _opts -> %HTTPoison.Response{} end)
 
     :proc_lib.spawn(fn ->
       raise RuntimeError, "Oops"
@@ -35,11 +35,13 @@ defmodule Bugsnag.LoggerTest do
 
     :timer.sleep(250)
 
-    assert :meck.called(HTTP, :post, [:_, :_, :_])
+    assert :meck.called(HTTPoison, :post, [:_, :_, :_, :_])
   end
 
   test "crashes do not cause recursive logging" do
-    :meck.expect(HTTP, :post, fn _ex, _c, _s -> %HTTP.Error{reason: 500} end)
+    :meck.expect(HTTPoison, :post, fn _url, _body, _headers, _opts ->
+      %HTTPoison.Error{reason: 500}
+    end)
 
     log_msg =
       capture_log(fn ->
@@ -49,12 +51,12 @@ defmodule Bugsnag.LoggerTest do
       end)
 
     assert log_msg =~ "[[error_info: {:error, %RuntimeError{message: \"Oops\"}, []}], []]"
-    assert :meck.called(HTTP, :post, [:_, :_, :_])
+    assert :meck.called(HTTPoison, :post, [:_, :_, :_, :_])
   end
 
   test "log levels lower than :error_report are ignored" do
     message_types = [:info_msg, :info_report, :warning_msg, :error_msg]
-    :meck.expect(HTTP, :post, fn _ex, _c, _s -> %HTTP.Response{} end)
+    :meck.expect(HTTPoison, :post, fn _url, _body, _headers, _opts -> %HTTPoison.Response{} end)
 
     Enum.each(message_types, fn type ->
       assert capture_log(fn ->
@@ -63,11 +65,11 @@ defmodule Bugsnag.LoggerTest do
     end)
 
     :timer.sleep(250)
-    refute :meck.called(HTTP, :post, [:_, :_, :_])
+    refute :meck.called(HTTPoison, :post, [:_, :_, :_, :_])
   end
 
   test "logging exceptions from special processes" do
-    :meck.expect(HTTP, :post, fn _ex, _c, _s -> %HTTP.Response{} end)
+    :meck.expect(HTTPoison, :post, fn _url, _body, _headers, _opts -> %HTTPoison.Response{} end)
 
     :proc_lib.spawn(fn ->
       Float.parse("12.345e308")
@@ -75,11 +77,11 @@ defmodule Bugsnag.LoggerTest do
 
     :timer.sleep(250)
 
-    assert :meck.called(HTTP, :post, [:_, :_, :_])
+    assert :meck.called(HTTPoison, :post, [:_, :_, :_, :_])
   end
 
   test "logging exceptions from Tasks" do
-    :meck.expect(HTTP, :post, fn _ex, _c, _s -> %HTTP.Response{} end)
+    :meck.expect(HTTPoison, :post, fn _url, _body, _headers, _opts -> %HTTPoison.Response{} end)
 
     log_msg =
       capture_log(fn ->
@@ -88,11 +90,11 @@ defmodule Bugsnag.LoggerTest do
       end)
 
     assert log_msg =~ "(ArgumentError) argument error"
-    assert :meck.called(HTTP, :post, [:_, :_, :_])
+    assert :meck.called(HTTPoison, :post, [:_, :_, :_, :_])
   end
 
   test "logging exceptions from GenServers" do
-    :meck.expect(HTTP, :post, fn _ex, _c, _s -> %HTTP.Response{} end)
+    :meck.expect(HTTPoison, :post, fn _url, _body, _headers, _opts -> %HTTPoison.Response{} end)
 
     {:ok, pid} = ErrorServer.start()
 
@@ -105,7 +107,7 @@ defmodule Bugsnag.LoggerTest do
     # We assert either of these log messages because the log changed between elixir
     # versions. It feels like we shouldn't need to assert on the log message but...
     assert log_msg =~ "(stop) bad cast: :fail" || log_msg =~ "but no handle_cast"
-    assert :meck.called(HTTP, :post, [:_, :_, :_])
+    assert :meck.called(HTTPoison, :post, [:_, :_, :_, :_])
   end
 
   test "warns if error report format is invalid" do
