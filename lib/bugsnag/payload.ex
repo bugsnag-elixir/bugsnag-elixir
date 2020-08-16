@@ -118,11 +118,11 @@ defmodule Bugsnag.Payload do
     stacktrace
     |> Enum.reverse()
     |> Enum.reduce([], fn
-      # this happens when the function was not found,
-      # since there is no file/line data, let's use the last known location instead,
-      # because by default Bugsnag will group by the top frame's location
       {module, function, args, []}, acc ->
-        last_frame = hd(acc)
+        # this happens when the function was not found,
+        # since there is no file/line data, let's use the last known location instead,
+        # because by default Bugsnag will group by the top frame's location
+        last_frame = List.first(acc) || %{file: "unknown", lineNumber: 0, inProject: false}
 
         [
           %{
