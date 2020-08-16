@@ -33,7 +33,7 @@ defmodule Bugsnag.Mixfile do
     [
       {:httpoison, "~> 0.13 or ~> 1.0"},
       {:jason, "~> 1.0", optional: true},
-      {:poison, "~> 1.5 or ~> 2.0 or ~> 3.0", optional: true},
+      {:poison, ">= 1.5.0", optional: true},
       {:ex_doc, ">= 0.0.0", only: :dev},
       {:meck, "~> 0.8.3", only: :test}
     ]
