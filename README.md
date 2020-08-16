@@ -43,7 +43,7 @@ Capture exceptions and send them to the [Bugsnag](https://www.bugsnag.com/) API!
 # mix.exs
 defp deps do
   [
-    {:bugsnag, "~> 2.0.0"},
+    {:bugsnag, "~> 2.1.0"},
     # pick ONE of these JSON encoding libraries:
     {:jason, "~> 1.0"},
     {:poison, "~> 4.0"}
