@@ -6,7 +6,7 @@ defmodule Bugsnag.PayloadTest do
     try do
       # If the following line is not on line 9 then tests will start failing.
       # You've been warned!
-      Module.concat(Elixir, "Harbour").cats(3)
+      raise "an error occurred"
     rescue
       exception -> [exception, System.stacktrace()]
     end
@@ -63,7 +63,6 @@ defmodule Bugsnag.PayloadTest do
 
   test "it generates correct stacktraces when the current file was a script" do
     [
-      %{file: "unknown", lineNumber: 0, method: _},
       %{
         file: "test/bugsnag/payload_test.exs",
         lineNumber: 9,
@@ -86,14 +85,34 @@ defmodule Bugsnag.PayloadTest do
       Payload.new(exception, stacktrace, [])
 
     [
-      %{file: "unknown", lineNumber: 0, method: "Movies.watch(:thor, 3, \"ragnarok\\n\")"},
+      %{file: _, lineNumber: _, method: "Movies.watch(:thor, 3, \"ragnarok\\n\")"},
       %{file: "test/bugsnag/payload_test.exs", lineNumber: _, method: _, code: _} | _
     ] = stacktrace
   end
 
+  # NOTE: this prevents all UndefinedFunctionError occurrences to be grouped into a single error
+  test "location for an undefined function is same as caller" do
+    {exception, stacktrace} =
+      try do
+        Module.concat(Elixir, "Bugsnag.Payload").non_existent_func()
+      rescue
+        exception -> {exception, System.stacktrace()}
+      end
+
+    %{events: [%{exceptions: [%{stacktrace: stacktrace}]}]} =
+      Payload.new(exception, stacktrace, [])
+
+    [
+      %{file: file1, lineNumber: ln1, method: "Bugsnag.Payload.non_existent_func()"},
+      %{file: file2, lineNumber: ln2, method: _, code: _} | _
+    ] = stacktrace
+
+    assert file1 == file2
+    assert ln1 == ln2
+  end
+
   test "reports stack frames as not being in-project by default" do
     [
-      %{file: "unknown", inProject: false},
       %{file: "test/bugsnag/payload_test.exs", inProject: false} | _
     ] = get_exception().stacktrace
   end
@@ -102,7 +121,6 @@ defmodule Bugsnag.PayloadTest do
     in_project = "bugsnag/payload_test"
 
     [
-      %{file: "unknown", inProject: false},
       %{file: "test/bugsnag/payload_test.exs", inProject: true} | _
     ] = get_exception(in_project: in_project).stacktrace
   end
@@ -111,7 +129,6 @@ defmodule Bugsnag.PayloadTest do
     in_project = ~r(^test.*bugsnag)
 
     [
-      %{file: "unknown", inProject: false},
       %{file: "test/bugsnag/payload_test.exs", inProject: true} | _
     ] = get_exception(in_project: in_project).stacktrace
   end
@@ -120,7 +137,6 @@ defmodule Bugsnag.PayloadTest do
     in_project = fn {_mod, fun, _args, _file} -> fun == :get_problem end
 
     [
-      %{file: "unknown", inProject: false},
       %{method: "Bugsnag.PayloadTest.get_problem/0", inProject: true},
       %{method: "Bugsnag.PayloadTest" <> _, inProject: false} | _
     ] = get_exception(in_project: in_project).stacktrace
@@ -134,18 +150,17 @@ defmodule Bugsnag.PayloadTest do
     in_project = {MyApp, :in_project?, [:get_problem]}
 
     [
-      %{file: "unknown", inProject: false},
       %{method: "Bugsnag.PayloadTest.get_problem/0", inProject: true},
       %{method: "Bugsnag.PayloadTest" <> _, inProject: false} | _
     ] = get_exception(in_project: in_project).stacktrace
   end
 
   test "it reports the error class" do
-    assert UndefinedFunctionError == get_exception().errorClass
+    assert RuntimeError == get_exception().errorClass
   end
 
   test "it reports the error message" do
-    assert get_exception().message =~ "(module Harbour is not available)"
+    assert get_exception().message =~ "an error occurred"
   end
 
   test "it reports the error severity" do

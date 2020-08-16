@@ -115,25 +115,38 @@ defmodule Bugsnag.Payload do
   defp format_stacktrace(stacktrace, options) do
     in_project_fn = get_in_project_fn(options)
 
-    Enum.map(stacktrace, fn
-      {module, function, args, []} ->
-        %{
-          file: "unknown",
-          lineNumber: 0,
-          inProject: false,
-          method: sanitize(Exception.format_mfa(module, function, args))
-        }
+    stacktrace
+    |> Enum.reverse()
+    |> Enum.reduce([], fn
+      {module, function, args, []}, acc ->
+        # this happens when the function was not found,
+        # since there is no file/line data, let's use the last known location instead,
+        # because by default Bugsnag will group by the top frame's location
+        last_frame = List.first(acc) || %{file: "unknown", lineNumber: 0, inProject: false}
 
-      {module, function, args, [file: file, line: line_number]} ->
+        [
+          %{
+            file: last_frame.file,
+            lineNumber: last_frame.lineNumber,
+            inProject: last_frame.inProject,
+            method: sanitize(Exception.format_mfa(module, function, args))
+          }
+          | acc
+        ]
+
+      {module, function, args, [file: file, line: line_number]}, acc ->
         file = to_string(file)
 
-        %{
-          file: file,
-          lineNumber: line_number,
-          inProject: in_project_fn.({module, function, args, file}),
-          method: sanitize(Exception.format_mfa(module, function, args)),
-          code: get_file_contents(file, line_number)
-        }
+        [
+          %{
+            file: file,
+            lineNumber: line_number,
+            inProject: in_project_fn.({module, function, args, file}),
+            method: sanitize(Exception.format_mfa(module, function, args)),
+            code: get_file_contents(file, line_number)
+          }
+          | acc
+        ]
     end)
   end
 
