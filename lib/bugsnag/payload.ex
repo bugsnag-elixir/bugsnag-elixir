@@ -118,27 +118,35 @@ defmodule Bugsnag.Payload do
     stacktrace
     |> Enum.reverse()
     |> Enum.reduce([], fn
-       # this happens when the function was not found,
-       # since there is no file/line data, let's use the last known location instead,
-       # because by default Bugsnag will group by the top frame's location
+      # this happens when the function was not found,
+      # since there is no file/line data, let's use the last known location instead,
+      # because by default Bugsnag will group by the top frame's location
       {module, function, args, []}, acc ->
         last_frame = hd(acc)
-        [%{
-          file: last_frame.file,
-          lineNumber: last_frame.lineNumber,
-          inProject: last_frame.inProject,
-          method: sanitize(Exception.format_mfa(module, function, args))
-        } | acc]
+
+        [
+          %{
+            file: last_frame.file,
+            lineNumber: last_frame.lineNumber,
+            inProject: last_frame.inProject,
+            method: sanitize(Exception.format_mfa(module, function, args))
+          }
+          | acc
+        ]
 
       {module, function, args, [file: file, line: line_number]}, acc ->
         file = to_string(file)
-        [%{
-          file: file,
-          lineNumber: line_number,
-          inProject: in_project_fn.({module, function, args, file}),
-          method: sanitize(Exception.format_mfa(module, function, args)),
-          code: get_file_contents(file, line_number)
-        } | acc]
+
+        [
+          %{
+            file: file,
+            lineNumber: line_number,
+            inProject: in_project_fn.({module, function, args, file}),
+            method: sanitize(Exception.format_mfa(module, function, args)),
+            code: get_file_contents(file, line_number)
+          }
+          | acc
+        ]
     end)
   end
 
