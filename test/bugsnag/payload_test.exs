@@ -232,7 +232,7 @@ defmodule Bugsnag.PayloadTest do
       decoded_payload =
         get_payload()
         |> Payload.encode()
-        |> Bugsnag.json_library().decode!()
+        |> Jason.decode!()
 
       assert decoded_payload["apiKey"] == "FAKEKEY"
     end
