@@ -31,7 +31,7 @@ defmodule Bugsnag do
 
   (i.e. this might fail silently)
   """
-  @spec report(exception :: term(), opts :: list()) :: :ok | {:error, :cannot_start_task}
+  @spec report(exception :: term(), opts :: list()) :: {:ok, pid()} | {:error, :cannot_start_task}
   defdelegate report(exception, opts \\ []), to: Bugsnag.Reporter
 
   @doc "Report the exception and wait for the result. Returns `:ok` or `{:error, reason}`."

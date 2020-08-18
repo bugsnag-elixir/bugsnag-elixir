@@ -8,8 +8,9 @@ defmodule Bugsnag.Reporter do
   @request_headers [{"Content-Type", "application/json"}]
 
   @doc """
-  Report the exception without waiting for the result of the Bugsnag API call
+  Report the exception without waiting for the result of the Bugsnag API call.
   """
+  @spec report(exception :: term(), opts :: list()) :: {:ok, pid()} | {:error, :cannot_start_task}
   def report(exception, options \\ []) do
     start_task =
       Task.Supervisor.start_child(
@@ -24,7 +25,7 @@ defmodule Bugsnag.Reporter do
       )
 
     case start_task do
-      {:ok, _pid} -> :ok
+      {:ok, pid} -> {:ok, pid}
       _otherwise -> {:error, :cannot_start_task}
     end
   end
