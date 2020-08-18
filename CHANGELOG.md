@@ -4,6 +4,9 @@
 
 ## 2.1.1
 
+### Added
+- Reuse file/line information from previous frame for UndefinedFunctionError [#88](https://github.com/bugsnag-elixir/bugsnag-elixir/pull/88)
+
 ### Fixed
 - Change back return type of `Bugsnag.report/2` to `{:ok, pid}` (changed to `:ok` in 2.1.0)
 
