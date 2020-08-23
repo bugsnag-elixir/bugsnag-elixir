@@ -2,6 +2,7 @@ defmodule Bugsnag.HTTPClient do
   @moduledoc """
   A Behavior defining an HTTP Client for Bugsnag
   """
+  alias Bugsnag.HTTPClient.HTTPoison
   alias Bugsnag.HTTPClient.Request
   alias Bugsnag.HTTPClient.Response
 
@@ -10,17 +11,10 @@ defmodule Bugsnag.HTTPClient do
   @callback post(Request.t()) :: success() | failure()
 
   def post(request) do
-    request.url
-    |> HTTPoison.post(request.body, request.headers, request.opts)
-    |> case do
-      {:ok, %{body: body, headers: headers, status_code: status}} ->
-        {:ok, Response.new(status, headers, body)}
+    adapter().post(request)
+  end
 
-      {:error, %{reason: reason}} ->
-        {:error, reason}
-
-      _ ->
-        {:error, :unknown}
-    end
+  defp adapter do
+    Application.get_env(:bugsnag, :http_client, HTTPoison)
   end
 end
