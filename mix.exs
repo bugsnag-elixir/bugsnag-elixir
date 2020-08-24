@@ -38,7 +38,7 @@ defmodule Bugsnag.Mixfile do
       {:jason, "~> 1.0", optional: true},
       {:poison, ">= 1.5.0", optional: true},
       {:ex_doc, ">= 0.0.0", only: :dev},
-      {:meck, "~> 0.9.0", only: :test}
+      {:hammox, "~> 0.2", onyl: :test}
     ]
   end
 end
