@@ -5,7 +5,7 @@ defmodule Bugsnag.LoggerTest do
   alias Bugsnag.HTTPClient.Request
   alias Bugsnag.HTTPClient.Response
   import ExUnit.CaptureLog
-  import Hammox
+  import Mox
 
   setup :set_mox_global
   setup :verify_on_exit!
@@ -26,7 +26,7 @@ defmodule Bugsnag.LoggerTest do
     parent = self()
     ref = make_ref()
 
-    Hammox.expect(HTTPMock, :post, fn %Request{body: body} ->
+    Mox.expect(HTTPMock, :post, fn %Request{body: body} ->
       if exception?(body, "Elixir.RuntimeError", "Oh noes") do
         send(parent, {:post, ref})
       end
@@ -46,7 +46,7 @@ defmodule Bugsnag.LoggerTest do
     parent = self()
     ref = make_ref()
 
-    Hammox.expect(HTTPMock, :post, fn %Request{body: body} ->
+    Mox.expect(HTTPMock, :post, fn %Request{body: body} ->
       if exception?(body, "Elixir.RuntimeError", "Oops") do
         send(parent, {:post, ref})
       end
@@ -65,7 +65,7 @@ defmodule Bugsnag.LoggerTest do
     parent = self()
     ref = make_ref()
 
-    Hammox.expect(HTTPMock, :post, 0, fn _request ->
+    Mox.expect(HTTPMock, :post, 0, fn _request ->
       send(parent, {:post, ref})
       {:error, :just_no}
     end)
@@ -84,7 +84,7 @@ defmodule Bugsnag.LoggerTest do
     parent = self()
     ref = make_ref()
 
-    Hammox.expect(HTTPMock, :post, fn %Request{body: body} ->
+    Mox.expect(HTTPMock, :post, fn %Request{body: body} ->
       if exception?(body, "Elixir.ArgumentError", "argument error") do
         send(parent, {:post, ref})
       end
@@ -104,7 +104,7 @@ defmodule Bugsnag.LoggerTest do
     parent = self()
     ref = make_ref()
 
-    Hammox.expect(HTTPMock, :post, fn %Request{body: body} ->
+    Mox.expect(HTTPMock, :post, fn %Request{body: body} ->
       if exception?(body, "Elixir.ArgumentError", "argument error") do
         send(parent, {:post, ref})
       end
@@ -124,7 +124,7 @@ defmodule Bugsnag.LoggerTest do
     parent = self()
     ref = make_ref()
 
-    Hammox.expect(HTTPMock, :post, fn %Request{body: body} ->
+    Mox.expect(HTTPMock, :post, fn %Request{body: body} ->
       if exception?(body, "Elixir.RuntimeError", "but no handle_cast") do
         send(parent, {:post, ref})
       end
