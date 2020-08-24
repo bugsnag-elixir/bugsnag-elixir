@@ -162,7 +162,7 @@ defmodule Bugsnag.LoggerTest do
           ]
         }
       ]
-    } = Jason.decode!(body) |> IO.inspect()
+    } = Jason.decode!(body)
 
     exception_error_class =~ error_class and exception_message =~ message
   end
