@@ -34,7 +34,7 @@ defmodule Bugsnag.Mixfile do
 
   defp deps do
     [
-      {:httpoison, "~> 0.13 or ~> 1.0"},
+      {:httpoison, ">= 0.13.0", optional: true},
       {:jason, "~> 1.0", optional: true},
       {:poison, ">= 1.5.0", optional: true},
       {:ex_doc, ">= 0.0.0", only: :dev},
