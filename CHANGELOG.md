@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+### Warning
+
+`httpoison` is now an `optional` dependency. If you want to use the default `HTTPoison` adapter, add `httpoison` as a dependency to your app:
+```elixir
+  # mix.exs
+  defp deps do
+    [
+      {:bugsnag, "~> 2.1.0"},
+      {:httpoison, "~> 1.0"},
+      ...
+    ]
+  end
+```
+If you want to use other http client already in your project. Create a new adapter implementing the `Bugsnag.HTTPClient` behaviour, and configure Bugsnag to use it. eg:
+```elixir
+# config/config.exs
+config :bugsnag, 
+  ...,
+  http_client: MyApp.BugsnagHTTPAdapterUsingMyPreferredLib
+```
+
+
+## Added
+- Add `Bugsnag.HTTPClient` and default `Bugsnag.HTTPClient.Adapter.HTTPoison` adapter, configurable via `http_client` application config
+
 ## 2.1.0
 
 ### Fixed
