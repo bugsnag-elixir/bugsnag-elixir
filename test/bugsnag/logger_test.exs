@@ -1,115 +1,169 @@
 defmodule Bugsnag.LoggerTest do
   use ExUnit.Case
 
+  alias Bugsnag.HTTPMock
+  alias Bugsnag.HTTPClient.Request
+  alias Bugsnag.HTTPClient.Response
   import ExUnit.CaptureLog
+  import Mox
 
-  alias HTTPoison, as: HTTP
+  setup :set_mox_global
+  setup :verify_on_exit!
 
   setup_all do
-    :error_logger.add_report_handler(Bugsnag.Logger)
-
-    on_exit(fn ->
-      :error_logger.delete_report_handler(Bugsnag.Logger)
-    end)
-
     Application.put_env(:bugsnag, :release_stage, "test")
     Application.put_env(:bugsnag, :notify_release_stages, ["test"])
+    Application.put_env(:bugsnag, :http_client, HTTPMock)
 
-    on_exit(fn -> Application.delete_env(:bugsnag, :release_stage) end)
-    on_exit(fn -> Application.delete_env(:bugsnag, :notify_release_stages) end)
+    on_exit(fn ->
+      Application.delete_env(:bugsnag, :release_stage)
+      Application.delete_env(:bugsnag, :notify_release_stages)
+      Application.delete_env(:bugsnag, :http_client)
+    end)
   end
 
   test "logging a crash" do
-    :meck.expect(HTTP, :post, fn _ex, _c, _s -> %HTTP.Response{} end)
+    parent = self()
+    ref = make_ref()
 
-    :proc_lib.spawn(fn ->
-      raise RuntimeError, "Oops"
+    Mox.expect(HTTPMock, :post, fn %Request{body: body} ->
+      if exception?(body, "Elixir.RuntimeError", "Oh noes") do
+        send(parent, {:post, ref})
+      end
+
+      {:ok, Response.new(200, [], "body")}
     end)
 
-    :timer.sleep(250)
+    :proc_lib.spawn(fn ->
+      raise RuntimeError, "Oh noes"
+    end)
 
-    assert :meck.called(HTTP, :post, [:_, :_, :_])
-    :meck.unload(HTTP)
+    assert_receive {:post, ^ref}, 1_000
+    verify!()
   end
 
   test "crashes do not cause recursive logging" do
-    :meck.expect(HTTP, :post, fn _ex, _c, _s -> %HTTP.Error{reason: 500} end)
+    parent = self()
+    ref = make_ref()
 
-    log_msg =
-      capture_log(fn ->
-        error_report = [[error_info: {:error, %RuntimeError{message: "Oops"}, []}], []]
-        :error_logger.error_report(error_report)
-        :timer.sleep(250)
-      end)
+    Mox.expect(HTTPMock, :post, fn %Request{body: body} ->
+      if exception?(body, "Elixir.RuntimeError", "Oops") do
+        send(parent, {:post, ref})
+      end
 
-    assert log_msg =~ "[[error_info: {:error, %RuntimeError{message: \"Oops\"}, []}], []]"
-    assert :meck.called(HTTP, :post, [:_, :_, :_])
+      {:ok, Response.new(500, [], "body")}
+    end)
 
-    :meck.unload(HTTP)
+    error_report = [[error_info: {:error, %RuntimeError{message: "Oops"}, []}], []]
+    :error_logger.error_report(error_report)
+
+    assert_receive {:post, ^ref}, 1_000
+    verify!()
   end
 
   test "log levels lower than :error_report are ignored" do
+    parent = self()
+    ref = make_ref()
+
+    Mox.expect(HTTPMock, :post, 0, fn _request ->
+      send(parent, {:post, ref})
+      {:error, :just_no}
+    end)
+
     message_types = [:info_msg, :info_report, :warning_msg, :error_msg]
 
     Enum.each(message_types, fn type ->
-      log_msg =
-        capture_log(fn ->
-          :meck.expect(HTTP, :post, fn _ex, _c, _s -> %HTTP.Response{} end)
-          apply(:error_logger, type, ["Ignore me"])
-          :timer.sleep(250)
-          refute :meck.called(HTTP, :post, [:_, :_, :_])
-        end)
-
-      assert log_msg =~ "Ignore me"
+      apply(:error_logger, type, ["Ignore me"])
     end)
 
-    :meck.unload(HTTP)
+    refute_receive {:post, ^ref}, 1_000
+    verify!()
   end
 
   test "logging exceptions from special processes" do
-    :meck.expect(HTTP, :post, fn _ex, _c, _s -> %HTTP.Response{} end)
+    parent = self()
+    ref = make_ref()
+
+    Mox.expect(HTTPMock, :post, fn %Request{body: body} ->
+      if exception?(body, "Elixir.ArgumentError", "argument error") do
+        send(parent, {:post, ref})
+      end
+
+      {:ok, Response.new(200, [], "body")}
+    end)
 
     :proc_lib.spawn(fn ->
       Float.parse("12.345e308")
     end)
 
-    :timer.sleep(250)
-
-    assert :meck.called(HTTP, :post, [:_, :_, :_])
-    :meck.unload(HTTP)
+    assert_receive {:post, ^ref}, 1_000
+    verify!()
   end
 
   test "logging exceptions from Tasks" do
-    :meck.expect(HTTP, :post, fn _ex, _c, _s -> %HTTP.Response{} end)
+    parent = self()
+    ref = make_ref()
 
-    log_msg =
-      capture_log(fn ->
-        Task.start(fn -> Float.parse("12.345e308") end)
-        :timer.sleep(250)
-      end)
+    Mox.expect(HTTPMock, :post, fn %Request{body: body} ->
+      if exception?(body, "Elixir.ArgumentError", "argument error") do
+        send(parent, {:post, ref})
+      end
 
-    assert log_msg =~ "(ArgumentError) argument error"
-    assert :meck.called(HTTP, :post, [:_, :_, :_])
+      {:ok, Response.new(200, [], "body")}
+    end)
 
-    :meck.unload(HTTP)
+    Task.start(fn ->
+      Float.parse("12.345e308")
+    end)
+
+    assert_receive {:post, ^ref}, 1_000
+    verify!()
   end
 
   test "logging exceptions from GenServers" do
-    :meck.expect(HTTP, :post, fn _ex, _c, _s -> %HTTP.Response{} end)
+    parent = self()
+    ref = make_ref()
+
+    Mox.expect(HTTPMock, :post, fn %Request{body: body} ->
+      if exception?(body, "Elixir.RuntimeError", "but no handle_cast") do
+        send(parent, {:post, ref})
+      end
+
+      {:ok, Response.new(200, [], "body")}
+    end)
 
     {:ok, pid} = ErrorServer.start()
+    GenServer.cast(pid, :fail)
+
+    assert_receive {:post, ^ref}, 1_000
+    verify!()
+  end
+
+  test "warns if error report format is invalid" do
+    event = {:error_report, :gl, {:pid, :type, [[error_info: :invalid]]}}
 
     log_msg =
       capture_log(fn ->
-        GenServer.cast(pid, :fail)
-        :timer.sleep(250)
+        Bugsnag.Logger.handle_event(event, :state)
       end)
 
-    # We assert either of these log messages because the log changed between elixir
-    # versions. It feels like we shouldn't need to assert on the log message but...
-    assert log_msg =~ "(stop) bad cast: :fail" || log_msg =~ "but no handle_cast"
-    assert :meck.called(HTTP, :post, [:_, :_, :_])
+    assert log_msg =~ "Unable to notify Bugsnag. ** (CaseClauseError)"
+  end
 
-    :meck.unload(HTTP)
+  defp exception?(body, error_class, message) do
+    %{
+      "events" => [
+        %{
+          "exceptions" => [
+            %{
+              "errorClass" => exception_error_class,
+              "message" => exception_message
+            }
+          ]
+        }
+      ]
+    } = Jason.decode!(body)
+
+    exception_error_class =~ error_class and exception_message =~ message
   end
 end

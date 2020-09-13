@@ -53,9 +53,16 @@ defmodule BugsnagTest do
   end
 
   test "it doesn't warn about api_key if the current release stage is not a notifying one" do
+    {:ok, old_key} = Application.fetch_env(:bugsnag, :api_key)
+    Application.delete_env(:bugsnag, :api_key)
+
     {:ok, old_stage} = Application.fetch_env(:bugsnag, :release_stage)
     Application.put_env(:bugsnag, :release_stage, "development")
-    on_exit(fn -> Application.put_env(:bugsnag, :release_stage, old_stage) end)
+
+    on_exit(fn ->
+      Application.put_env(:bugsnag, :release_stage, old_stage)
+      Application.put_env(:bugsnag, :api_key, old_key)
+    end)
 
     assert capture_log(fn -> Bugsnag.start(:temporary, %{}) end) == ""
   end
@@ -146,11 +153,5 @@ defmodule BugsnagTest do
     on_exit(fn -> Application.put_env(:bugsnag, :notify_release_stages, old_notify_stages) end)
 
     assert :ok = Bugsnag.sync_report(RuntimeError.exception("some_error"))
-  end
-
-  test "uses Jason as JSON library by default" do
-    Application.delete_env(:bugsnag, :json_library)
-
-    assert Bugsnag.json_library() == Jason
   end
 end

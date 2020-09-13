@@ -1,3 +1,4 @@
-Code.load_file("test/support/error_server.exs")
+Mox.defmock(Bugsnag.HTTPMock, for: Bugsnag.HTTPClient)
+Application.ensure_all_started(:httpoison)
 
-ExUnit.start()
+ExUnit.start(capture_log: true)

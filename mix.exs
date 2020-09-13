@@ -4,8 +4,9 @@ defmodule Bugsnag.Mixfile do
   def project do
     [
       app: :bugsnag,
-      version: "2.0.0",
-      elixir: "~> 1.3",
+      version: "2.1.1",
+      elixir: "~> 1.6",
+      elixirc_paths: elixirc_paths(Mix.env()),
       package: package(),
       description: "An Elixir interface to the Bugsnag API.",
       deps: deps()
@@ -21,17 +22,23 @@ defmodule Bugsnag.Mixfile do
     ]
   end
 
+  defp elixirc_paths(:test), do: ["lib", "web", "test/support"]
+  defp elixirc_paths(_), do: ["lib", "web"]
+
   def application do
-    [applications: [:httpoison, :logger], mod: {Bugsnag, []}]
+    [
+      mod: {Bugsnag, []},
+      extra_applications: [:logger]
+    ]
   end
 
   defp deps do
     [
-      {:httpoison, "~> 0.13 or ~> 1.0"},
+      {:httpoison, ">= 0.13.0", optional: true},
       {:jason, "~> 1.0", optional: true},
-      {:poison, "~> 1.5 or ~> 2.0 or ~> 3.0", optional: true},
+      {:poison, ">= 1.5.0", optional: true},
       {:ex_doc, ">= 0.0.0", only: :dev},
-      {:meck, "~> 0.8.3", only: :test}
+      {:mox, "~> 0.5", onyl: :test}
     ]
   end
 end

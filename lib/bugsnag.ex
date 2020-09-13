@@ -1,105 +1,62 @@
 defmodule Bugsnag do
   use Application
-  import Supervisor.Spec
   require Logger
 
-  alias Bugsnag.Payload
-
-  @notify_url "https://notify.bugsnag.com"
-  @request_headers [{"Content-Type", "application/json"}]
-
   def start(_type, _args) do
-    config =
-      default_config()
-      |> Keyword.merge(Application.get_all_env(:bugsnag))
-      |> Enum.map(fn {k, v} -> {k, eval_config(v)} end)
-      |> Keyword.update!(:notify_release_stages, fn stages ->
-        if(is_binary(stages), do: String.split(stages, ","), else: stages)
-      end)
+    config = load_config()
 
-    if to_string(config[:use_logger]) == "true" do
+    if use_logger?(config) do
       Logger.add_backend(Bugsnag.Logger)
     end
 
     # Update Application config with evaluated configuration
-    # It's needed for use in Bugsnag.Payload, could be removed
-    # by using GenServer instead of this kind of app.
+    # It's needed for use in Bugsnag.Payload
     Enum.each(config, fn {k, v} ->
       Application.put_env(:bugsnag, k, v)
     end)
 
-    if !config[:api_key] and reported_stage() do
+    if is_nil(config[:api_key]) and reported_stage?() do
       Logger.warn("Bugsnag api_key is not configured, errors will not be reported")
     end
 
     children = [
-      supervisor(Task.Supervisor, [[name: Bugsnag.TaskSupervisor]])
+      {Task.Supervisor, name: Bugsnag.TaskSupervisor}
     ]
 
-    opts = [strategy: :one_for_one, name: Bugsnag.Supervisor]
-    Supervisor.start_link(children, opts)
+    Supervisor.start_link(children, strategy: :one_for_one, name: Bugsnag.Supervisor)
   end
 
   @doc """
   Report the exception without waiting for the result of the Bugsnag API call.
-  (I.e. this might fail silently)
+
+  (i.e. this might fail silently)
   """
-  def report(exception, options \\ []) do
-    Task.Supervisor.start_child(Bugsnag.TaskSupervisor, __MODULE__, :sync_report, [
-      exception,
-      add_stacktrace(options)
-    ], [restart: :transient])
-  end
+  @spec report(exception :: term(), opts :: list()) :: {:ok, pid()} | {:error, :cannot_start_task}
+  defdelegate report(exception, opts \\ []), to: Bugsnag.Reporter
 
-  def json_library(), do: Application.get_env(:bugsnag, :json_library, Jason)
+  @doc "Report the exception and wait for the result. Returns `:ok` or `{:error, reason}`."
+  @spec sync_report(exception :: term(), opts :: list()) :: :ok | {:error, reason :: term()}
+  defdelegate sync_report(exception, opts \\ []), to: Bugsnag.Reporter
 
-  defp add_stacktrace(options) do
-    if options[:stacktrace], do: options, else: put_in(options[:stacktrace], System.stacktrace())
-  end
-
-  @doc "Report the exception and wait for the result. Returns `ok` or `{:error, reason}`."
-  def sync_report(exception, options \\ []) do
-    stacktrace = options[:stacktrace] || System.stacktrace()
-
-    if should_notify(exception, stacktrace) do
-      if Application.get_env(:bugsnag, :api_key) do
-        exception
-        |> Payload.new(stacktrace, options)
-        |> Payload.encode()
-        |> send_notification
-        |> case do
-          {:ok, %{status_code: 200}} -> :ok
-          {:ok, %{status_code: other}} -> {:error, "status_#{other}"}
-          {:error, %{reason: reason}} -> {:error, reason}
-          _ -> {:error, :unknown}
-        end
-      else
-        Logger.warn("Bugsnag api_key is not configured, error not reported")
-        {:error, %{reason: "API key is not configured"}}
-      end
-    else
-      {:ok, :not_sent}
-    end
-  end
-
-  defp send_notification(body) do
-    HTTPoison.post(notify_url(), body, @request_headers)
-  end
-
-  defp reported_stage() do
+  defp reported_stage?() do
     release_stage = Application.get_env(:bugsnag, :release_stage)
     notify_stages = Application.get_env(:bugsnag, :notify_release_stages)
     release_stage && is_list(notify_stages) && Enum.member?(notify_stages, release_stage)
   end
 
-  def should_notify(exception, stacktrace) do
-    reported_stage() && test_filter(exception_filter(), exception, stacktrace)
+  defp load_config do
+    default_config()
+    |> Keyword.merge(Application.get_all_env(:bugsnag))
+    |> Enum.map(fn {k, v} -> {k, eval_config(v)} end)
+    |> Keyword.update!(:notify_release_stages, fn stages ->
+      if(is_binary(stages), do: String.split(stages, ","), else: stages)
+    end)
   end
 
   defp default_config do
     [
       api_key: {:system, "BUGSNAG_API_KEY", nil},
-      endpoint_url: {:system, "BUGSNAG_ENDPOINT_URL", @notify_url},
+      endpoint_url: {:system, "BUGSNAG_ENDPOINT_URL", "https://notify.bugsnag.com"},
       use_logger: {:system, "BUGSNAG_USE_LOGGER", true},
       release_stage: {:system, "BUGSNAG_RELEASE_STAGE", "production"},
       notify_release_stages: {:system, "BUGSNAG_NOTIFY_RELEASE_STAGES", ["production"]},
@@ -123,23 +80,7 @@ defmodule Bugsnag do
 
   defp eval_config(value), do: value
 
-  defp notify_url do
-    Application.get_env(:bugsnag, :endpoint_url, @notify_url)
-  end
-
-  defp exception_filter() do
-    Application.get_env(:bugsnag, :exception_filter)
-  end
-
-  defp test_filter(nil, _, _), do: true
-
-  defp test_filter(module, exception, stacktrace) do
-    try do
-      module.should_notify(exception, stacktrace)
-    rescue
-      _ ->
-        # Swallowing error in order to avoid exception loops
-        true
-    end
+  defp use_logger?(config) do
+    not is_nil(config[:api_key]) and to_string(config[:use_logger]) == "true"
   end
 end

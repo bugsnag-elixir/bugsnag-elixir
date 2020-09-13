@@ -1,5 +1,7 @@
 # Bugsnag Elixir
-[![Build Status](https://travis-ci.org/jarednorman/bugsnag-elixir.svg?branch=master)](https://travis-ci.org/jarednorman/bugsnag-elixir)
+[![Elixir CI](https://github.com/bugsnag-elixir/bugsnag-elixir/workflows/Elixir%20CI/badge.svg)](https://github.com/bugsnag-elixir/bugsnag-elixir/actions)
+[![Bugsnag version](https://img.shields.io/hexpm/v/bugsnag.svg)](https://hex.pm/packages/bugsnag)
+[![Hex.pm](https://img.shields.io/hexpm/dt/bugsnag.svg)](https://hex.pm/packages/bugsnag)
 
 Capture exceptions and send them to the [Bugsnag](https://www.bugsnag.com/) API!
 
@@ -28,6 +30,7 @@ Capture exceptions and send them to the [Bugsnag](https://www.bugsnag.com/) API!
     - [`use_logger`](#use_logger)
     - [`exception_filter`](#exception_filter)
     - [`json_library`](#json_library)
+    - [`http_client`](#http_client)
   - [Usage](#usage)
     - [Manual Reporting](#manual-reporting)
     - [Reporting Options](#reporting-options)
@@ -41,17 +44,20 @@ Capture exceptions and send them to the [Bugsnag](https://www.bugsnag.com/) API!
 # mix.exs
 defp deps do
   [
-    {:bugsnag, "~> 2.0.0"},
+    {:bugsnag, "~> 2.1.0"},
     # pick ONE of these JSON encoding libraries:
     {:jason, "~> 1.0"},
-    {:poison, "~> 3.0"}
+    {:poison, "~> 4.0"}
+    # add your http client of choice:
+    {:httpoison, "~> 1.0"},
   ]
 end
 ```
 
 ```elixir
 # config/config.exs
-config :bugsnag, api_key: "0123456789abcdef0123456789abcdef"
+config :bugsnag, 
+  api_key: "0123456789abcdef0123456789abcdef"
 ```
 
 The `:bugsnag` application must be started to report errors — this should be
@@ -87,12 +93,17 @@ on the runtime environment.
 # config/config.exs
 config :bugsnag,
   api_key: "0123456789abcdef0123456789abcdef",
-  release_stage: {:system, "MY_APP_ENV", "production"},
-  notify_release_stages: ["staging", "production"],
-  hostname: {:system, "HOST", "unknown"},
+  app_type: "elixir",
   app_version: Mix.Project.config[:version],
+  endpoint_url: "https://self-hosted-bugsnag.myapp",
+  hostname: {:system, "HOST", "unknown"},
+  http_client: MyApp.BugsnagHTTPAdapter,
   in_project: "lib/my_app_name",
-  sanitizer: {MyModule, :my_function}
+  json_library: Jason,
+  notify_release_stages: ["staging", "production"],
+  release_stage: {:system, "MY_APP_ENV", "production"},
+  sanitizer: {MyModule, :my_function},
+  use_logger: true
 ```
 
 See below for explanations of each option, including some options not used here.
@@ -244,6 +255,12 @@ end
 **Default:** `Jason`
 
 The JSON encoding library.
+
+### `http_client`
+
+**Default** `Bugsnag.HTTPClient.Adapters.HTTPoison`
+
+An adapter implementing the `Bugsnag.HTTPClient` behaviour.
 
 ## Usage
 
