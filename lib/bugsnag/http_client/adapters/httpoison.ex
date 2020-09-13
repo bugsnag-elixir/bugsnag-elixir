@@ -1,4 +1,4 @@
-defmodule Bugsnag.HTTPClient.HTTPoison do
+defmodule Bugsnag.HTTPClient.Adapters.HTTPoison do
   @moduledoc """
   HTTPoison adapter for Bugsnag.HTTPClient
   """

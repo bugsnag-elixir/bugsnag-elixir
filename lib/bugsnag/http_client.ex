@@ -2,7 +2,7 @@ defmodule Bugsnag.HTTPClient do
   @moduledoc """
   A Behavior defining an HTTP Client for Bugsnag
   """
-  alias Bugsnag.HTTPClient.HTTPoison
+  alias Bugsnag.HTTPClient.Adapters.HTTPoison
   alias Bugsnag.HTTPClient.Request
   alias Bugsnag.HTTPClient.Response
 
