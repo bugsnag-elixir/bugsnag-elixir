@@ -5,7 +5,7 @@ defmodule Bugsnag do
   def start(_type, _args) do
     config = load_config()
 
-    if to_string(config[:use_logger]) == "true" do
+    if use_logger?(config) do
       :error_logger.add_report_handler(Bugsnag.Logger)
     end
 
@@ -79,4 +79,8 @@ defmodule Bugsnag do
   end
 
   defp eval_config(value), do: value
+
+  defp use_logger?(config) do
+    not is_nil(config[:api_key]) and to_string(config[:use_logger]) == "true"
+  end
 end

@@ -2,10 +2,11 @@ defmodule Bugsnag.Reporter do
   @moduledoc false
 
   alias Bugsnag.Payload
+  alias Bugsnag.HTTPClient
+  alias Bugsnag.HTTPClient.Request
   require Logger
 
   @default_notify_url "https://notify.bugsnag.com"
-  @request_headers [{"Content-Type", "application/json"}]
 
   @doc """
   Report the exception without waiting for the result of the Bugsnag API call.
@@ -38,12 +39,12 @@ defmodule Bugsnag.Reporter do
         exception
         |> Payload.new(stacktrace, options)
         |> Payload.encode()
-        |> send_notification
+        |> Request.new(notify_url())
+        |> HTTPClient.post()
         |> case do
-          {:ok, %{status_code: 200}} -> :ok
-          {:ok, %{status_code: other}} -> {:error, "status_#{other}"}
-          {:error, %{reason: reason}} -> {:error, reason}
-          _ -> {:error, :unknown}
+          {:ok, %{status: 200}} -> :ok
+          {:ok, %{status: other}} -> {:error, "status_#{other}"}
+          {:error, reason} -> {:error, reason}
         end
       else
         Logger.warn("Bugsnag api_key is not configured, error not reported")
@@ -52,10 +53,6 @@ defmodule Bugsnag.Reporter do
     else
       {:ok, :not_sent}
     end
-  end
-
-  defp send_notification(body) do
-    HTTPoison.post(notify_url(), body, @request_headers)
   end
 
   defp notify_url do
