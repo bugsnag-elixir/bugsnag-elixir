@@ -3,8 +3,8 @@ defmodule Bugsnag.HTTPClient.Response do
 
   @type t :: %__MODULE__{
           status: non_neg_integer(),
-          body: String.t(),
-          headers: list({String.t(), String.t()})
+          body: binary(),
+          headers: list({binary(), binary()})
         }
 
   defstruct [

@@ -3,8 +3,8 @@ defmodule Bugsnag.HTTPClient.Request do
 
   @type t :: %__MODULE__{
           url: String.t(),
-          body: String.t(),
-          headers: list({String.t(), String.t()}),
+          body: iodata(),
+          headers: list({binary(), binary()}),
           opts: Keyword.t()
         }
 
