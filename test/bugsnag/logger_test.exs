@@ -7,6 +7,8 @@ defmodule Bugsnag.LoggerTest do
   import ExUnit.CaptureLog
   import Mox
 
+  @receive_timeout 5_000
+
   setup :set_mox_global
   setup :verify_on_exit!
 
@@ -38,7 +40,7 @@ defmodule Bugsnag.LoggerTest do
       raise RuntimeError, "Oh noes"
     end)
 
-    assert_receive {:post, ^ref}, 1_000
+    assert_receive {:post, ^ref}, @receive_timeout
     verify!()
   end
 
@@ -57,7 +59,7 @@ defmodule Bugsnag.LoggerTest do
     error_report = [[error_info: {:error, %RuntimeError{message: "Oops"}, []}], []]
     :error_logger.error_report(error_report)
 
-    assert_receive {:post, ^ref}, 1_000
+    assert_receive {:post, ^ref}, @receive_timeout
     verify!()
   end
 
@@ -76,7 +78,7 @@ defmodule Bugsnag.LoggerTest do
       apply(:error_logger, type, ["Ignore me"])
     end)
 
-    refute_receive {:post, ^ref}, 1_000
+    refute_receive {:post, ^ref}, @receive_timeout
     verify!()
   end
 
@@ -96,7 +98,7 @@ defmodule Bugsnag.LoggerTest do
       Float.parse("12.345e308")
     end)
 
-    assert_receive {:post, ^ref}, 1_000
+    assert_receive {:post, ^ref}, @receive_timeout
     verify!()
   end
 
@@ -116,7 +118,7 @@ defmodule Bugsnag.LoggerTest do
       Float.parse("12.345e308")
     end)
 
-    assert_receive {:post, ^ref}, 1_000
+    assert_receive {:post, ^ref}, @receive_timeout
     verify!()
   end
 
@@ -135,7 +137,7 @@ defmodule Bugsnag.LoggerTest do
     {:ok, pid} = ErrorServer.start()
     GenServer.cast(pid, :fail)
 
-    assert_receive {:post, ^ref}, 1_000
+    assert_receive {:post, ^ref}, @receive_timeout
     verify!()
   end
 
