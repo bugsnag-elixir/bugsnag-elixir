@@ -18,10 +18,14 @@
 If you want to use other http client already in your project. Create a new adapter implementing the `Bugsnag.HTTPClient` behaviour, and configure Bugsnag to use it. eg:
 ```elixir
 # config/config.exs
-config :bugsnag, 
+config :bugsnag,
   ...,
   http_client: MyApp.BugsnagHTTPAdapterUsingMyPreferredLib
 ```
+
+### Removed
+
+- Removed support for elixir < 1.8
 
 ### Added
 - Add `Bugsnag.HTTPClient` and default `Bugsnag.HTTPClient.Adapter.HTTPoison` adapter, configurable via `http_client` application config

@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         # https://github.com/elixir-lang/elixir/releases
-        elixir: ["1.10.4", "1.9.4", "1.8.2", "1.7.4", "1.6.6"]
+        elixir: ["1.10.4", "1.9.4", "1.8.2"]
         # http://erlang.org/download/otp_versions_tree.html
         erlang: ["20.3.8", "21.3.8", "22.3.4"]
         ubuntu: ["focal-20200423"]
@@ -22,17 +22,9 @@ jobs:
           - elixir: "1.10.4"
             erlang: "23.0"
             ubuntu: "focal-20200423"
-          - elixir: "1.6.6"
-            erlang: "19.3.6.13"
-            ubuntu: "bionic-20200403"
-          - elixir: "1.7.4"
-            erlang: "19.3.6.13"
-            ubuntu: "bionic-20200403"
         exclude:
           - elixir: "1.10.4"
             erlang: "20.3.8"
-          - elixir: "1.6.6"
-            erlang: "22.3.4"
 
     container:
       image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-ubuntu-${{ matrix.ubuntu }}
@@ -47,7 +39,6 @@ jobs:
         mix deps.get
 
     - name: Check format
-      if: (!startsWith(matrix.elixir, '1.6') && !startsWith(matrix.elixir, '1.7'))
       run: mix format --check-formatted
 
     - name: Run tests
