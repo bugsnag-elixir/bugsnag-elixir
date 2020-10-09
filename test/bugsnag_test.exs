@@ -15,6 +15,18 @@ defmodule BugsnagTest do
     def should_notify(_e, _s), do: raise("boom")
   end
 
+  setup do
+    on_exit(fn ->
+      Bugsnag.TaskSupervisor
+      |> Task.Supervisor.children()
+      |> Enum.each(fn pending_task_pid ->
+        Task.Supervisor.terminate_child(Bugsnag.TaskSupervisor, pending_task_pid)
+      end)
+    end)
+
+    :ok
+  end
+
   test "it doesn't raise errors if you report garbage" do
     capture_log(fn ->
       Bugsnag.report(Enum, %{ignore: :this_error_in_test})
