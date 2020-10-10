@@ -326,6 +326,7 @@ The following options allow adding more data to the report:
 * `os_version` — Sets the reported OS version of the error
 * `stacktrace` — Allows passing in a stack trace, e.g. from `__STACKTRACE__`
 * `metadata` - Map of arbitrary metadata to include with the report
+* `error_class` - Allows passing in the error type instead of infering from the error struct
 
 [See the Bugsnag docs][2] for more information on these fields.
 

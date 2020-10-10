@@ -39,6 +39,16 @@ defmodule Bugsnag.PayloadTest do
     refute Map.has_key?(get_event(), :metaData)
   end
 
+  test "it adds error_class when given" do
+    error_class = CustomError
+    assert error_class == get_exception(error_class: error_class).errorClass
+  end
+
+  test "errorClass defaults to the exception struct module" do
+    [exception, _] = get_problem()
+    assert exception.__struct__ == get_exception().errorClass
+  end
+
   test "it generates correct stacktraces" do
     {exception, stacktrace} =
       try do
