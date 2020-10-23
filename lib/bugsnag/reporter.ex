@@ -32,7 +32,7 @@ defmodule Bugsnag.Reporter do
   end
 
   def sync_report(exception, options \\ []) do
-    stacktrace = options[:stacktrace] || System.stacktrace()
+    stacktrace = options[:stacktrace] || __STACKTRACE__
 
     if should_notify(exception, stacktrace) do
       if Application.get_env(:bugsnag, :api_key) do
@@ -86,6 +86,6 @@ defmodule Bugsnag.Reporter do
   end
 
   defp add_stacktrace(options) do
-    if options[:stacktrace], do: options, else: put_in(options[:stacktrace], System.stacktrace())
+    if options[:stacktrace], do: options, else: put_in(options[:stacktrace], __STACKTRACE__)
   end
 end

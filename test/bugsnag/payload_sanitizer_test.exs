@@ -22,7 +22,7 @@ defmodule Bugsnag.PayloadSanitizerTest do
       try do
         raise "123fail123"
       rescue
-        exception -> [exception, System.stacktrace(), []]
+        exception -> [exception, __STACKTRACE__, []]
       end
     end
 
@@ -81,12 +81,12 @@ defmodule Bugsnag.PayloadSanitizerTest do
   def get_problem(args, options \\ []) do
     Module.concat(Elixir, "Harbour").cats(args)
   rescue
-    exception -> [exception, System.stacktrace(), options]
+    exception -> [exception, __STACKTRACE__, options]
   end
 
   def get_problem_with_error_message(msg) do
     raise msg
   rescue
-    exception -> [exception, System.stacktrace(), []]
+    exception -> [exception, __STACKTRACE__, []]
   end
 end
