@@ -11,7 +11,8 @@ defmodule Bugsnag.Reporter do
   @doc """
   Report the exception without waiting for the result of the Bugsnag API call.
   """
-  @spec report(exception :: term(), stacktrace :: Exception.stacktrace(), opts :: list()) :: {:ok, pid()} | {:error, :cannot_start_task}
+  @spec report(exception :: term(), stacktrace :: Exception.stacktrace(), opts :: list()) ::
+          {:ok, pid()} | {:error, :cannot_start_task}
   def report(exception, stacktrace, opts \\ []) do
     start_task =
       Task.Supervisor.start_child(

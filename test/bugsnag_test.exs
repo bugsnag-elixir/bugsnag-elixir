@@ -98,7 +98,8 @@ defmodule BugsnagTest do
 
     log =
       capture_log(fn ->
-        assert {:error, %{reason: "API key is not configured"}} == Bugsnag.sync_report("error!", fake_stacktrace())
+        assert {:error, %{reason: "API key is not configured"}} ==
+                 Bugsnag.sync_report("error!", fake_stacktrace())
       end)
 
     assert log =~ "api_key is not configured"
@@ -110,7 +111,9 @@ defmodule BugsnagTest do
     on_exit(fn -> Application.put_env(:bugsnag, :release_stage, old_release_stage) end)
 
     refute Enum.member?(Application.get_env(:bugsnag, :notify_release_stages), "development")
-    assert {:ok, :not_sent} = Bugsnag.sync_report(RuntimeError.exception("some_error"), fake_stacktrace())
+
+    assert {:ok, :not_sent} =
+             Bugsnag.sync_report(RuntimeError.exception("some_error"), fake_stacktrace())
   end
 
   test "does not notify bugsnag if filter returns false" do
@@ -125,7 +128,8 @@ defmodule BugsnagTest do
     on_exit(fn -> Application.put_env(:bugsnag, :notify_release_stages, old_notify_stages) end)
     on_exit(fn -> Application.put_env(:bugsnag, :exception_filter, nil) end)
 
-    assert {:ok, :not_sent} = Bugsnag.sync_report(RuntimeError.exception("some_error"), fake_stacktrace())
+    assert {:ok, :not_sent} =
+             Bugsnag.sync_report(RuntimeError.exception("some_error"), fake_stacktrace())
   end
 
   test "notifies bugsnag if filter returns true" do
