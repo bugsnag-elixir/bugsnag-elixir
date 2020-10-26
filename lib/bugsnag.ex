@@ -31,12 +31,12 @@ defmodule Bugsnag do
 
   (i.e. this might fail silently)
   """
-  @spec report(exception :: term(), opts :: list()) :: {:ok, pid()} | {:error, :cannot_start_task}
-  defdelegate report(exception, opts \\ []), to: Bugsnag.Reporter
+  @spec report(exception :: term(), stacktrace :: Exception.stacktrace(), opts :: list()) :: {:ok, pid()} | {:error, :cannot_start_task}
+  defdelegate report(exception, stacktrace, opts \\ []), to: Bugsnag.Reporter
 
   @doc "Report the exception and wait for the result. Returns `:ok` or `{:error, reason}`."
-  @spec sync_report(exception :: term(), opts :: list()) :: :ok | {:error, reason :: term()}
-  defdelegate sync_report(exception, opts \\ []), to: Bugsnag.Reporter
+  @spec sync_report(exception :: term(), stacktrace :: Exception.stacktrace(), opts :: list()) :: :ok | {:error, reason :: term()}
+  defdelegate sync_report(exception, stacktrace, opts \\ []), to: Bugsnag.Reporter
 
   defp reported_stage?() do
     release_stage = Application.get_env(:bugsnag, :release_stage)
