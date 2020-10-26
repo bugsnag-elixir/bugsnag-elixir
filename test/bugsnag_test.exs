@@ -16,7 +16,7 @@ defmodule BugsnagTest do
   end
 
   def fake_stacktrace do
-    [{FilterCrash, :some_fun, 0, []}]
+    [{FilterCrash, :some_fun, 1, [file: "foobar", line: 1]}]
   end
 
   setup do
@@ -33,7 +33,7 @@ defmodule BugsnagTest do
 
   test "it doesn't raise errors if you report garbage" do
     capture_log(fn ->
-      Bugsnag.report(Enum, %{ignore: :this_error_in_test})
+      Bugsnag.report(Enum, nil, %{ignore: :this_error_in_test})
     end)
   end
 
