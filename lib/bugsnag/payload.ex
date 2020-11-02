@@ -55,7 +55,7 @@ defmodule Bugsnag.Payload do
   defp add_exception(event, exception, stacktrace, options) do
     Map.put(event, :exceptions, [
       %{
-        errorClass: exception.__struct__,
+        errorClass: Keyword.get(options, :error_class, exception.__struct__),
         message: sanitize(Exception.message(exception)),
         stacktrace: format_stacktrace(stacktrace, options)
       }
