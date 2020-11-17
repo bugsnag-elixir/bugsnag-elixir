@@ -44,11 +44,12 @@ Capture exceptions and send them to the [Bugsnag](https://www.bugsnag.com/) API!
 # mix.exs
 defp deps do
   [
-    {:bugsnag, "~> 2.1.0"},
+    {:bugsnag, "~> 3.0.0"},
     # pick ONE of these JSON encoding libraries:
     {:jason, "~> 1.0"},
     {:poison, "~> 4.0"}
-    # add your http client of choice:
+    # add your http client of choice
+    # or use httpoison for the default adapter:
     {:httpoison, "~> 1.0"},
   ]
 end

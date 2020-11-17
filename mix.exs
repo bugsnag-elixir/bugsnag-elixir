@@ -4,8 +4,8 @@ defmodule Bugsnag.Mixfile do
   def project do
     [
       app: :bugsnag,
-      version: "2.1.1",
-      elixir: "~> 1.6",
+      version: "3.0.0",
+      elixir: "~> 1.8",
       elixirc_paths: elixirc_paths(Mix.env()),
       package: package(),
       description: "An Elixir interface to the Bugsnag API.",
@@ -16,7 +16,7 @@ defmodule Bugsnag.Mixfile do
   def package do
     [
       contributors: ["Jared Norman", "Andrew Harvey", "Alex Grant", "Coburn Berry"],
-      maintainers: ["Coburn Berry"],
+      maintainers: ["Guilherme de Maio"],
       licenses: ["MIT"],
       links: %{github: "https://github.com/bugsnag-elixir/bugsnag-elixir"}
     ]

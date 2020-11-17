@@ -2,7 +2,11 @@
 
 ## Unreleased
 
-### Warning
+## 3.0.0
+
+The most notable change in this release is the inclusion of an HTTP Client adapter and the possibility of adding your own client. By doing this, `httpoison` is now an optional dependency and must be included in the dependency list in order to use the default adapter.
+
+### BREAKING CHANGES
 
 `httpoison` is now an `optional` dependency. If you want to use the default `HTTPoison` adapter, add `httpoison` as a dependency to your app:
 ```elixir
@@ -29,6 +33,12 @@ config :bugsnag,
 
 ### Added
 - Add `Bugsnag.HTTPClient` and default `Bugsnag.HTTPClient.Adapter.HTTPoison` adapter, configurable via `http_client` application config
+- Add option to set error class instead of infering from the exception [#108](https://github.com/bugsnag-elixir/bugsnag-elixir/pull/108)
+
+### Fixed / Maintenance
+
+- Ensure tasks under Bugsnag.TaskSupervisor don't spill into other tests [#106](https://github.com/bugsnag-elixir/bugsnag-elixir/pull/106)
+- bump dependencies: jason, mox, ex_docs
 
 ## 2.1.1
 
