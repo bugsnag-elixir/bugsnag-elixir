@@ -13,7 +13,7 @@ The most notable change in this release is the inclusion of an HTTP Client adapt
   # mix.exs
   defp deps do
     [
-      {:bugsnag, "~> 2.1.0"},
+      {:bugsnag, "~> 3.0.0"},
       {:httpoison, "~> 1.0"},
       ...
     ]
