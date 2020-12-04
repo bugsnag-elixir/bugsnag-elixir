@@ -1,7 +1,12 @@
 # Bugsnag Elixir
+
 [![Elixir CI](https://github.com/bugsnag-elixir/bugsnag-elixir/workflows/Elixir%20CI/badge.svg)](https://github.com/bugsnag-elixir/bugsnag-elixir/actions)
-[![Bugsnag version](https://img.shields.io/hexpm/v/bugsnag.svg)](https://hex.pm/packages/bugsnag)
-[![Hex.pm](https://img.shields.io/hexpm/dt/bugsnag.svg)](https://hex.pm/packages/bugsnag)
+[![Bugsnag Version](https://img.shields.io/hexpm/v/bugsnag.svg)](https://hex.pm/packages/bugsnag)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/bugsnag/)
+[![Total Download](https://img.shields.io/hexpm/dt/bugsnag.svg)](https://hex.pm/packages/bugsnag)
+[![License](https://img.shields.io/hexpm/l/bugsnag.svg)](https://github.com/bugsnag-elixir/bugsnag/blob/master/LICENSE)
+[![Last Updated](https://img.shields.io/github/last-commit/bugsnag-elixir/bugsnag-elixir.svg)](https://github.com/bugsnag-elixir/bugsnag-elixir/commits/master)
+
 
 Capture exceptions and send them to the [Bugsnag](https://www.bugsnag.com/) API!
 
@@ -57,7 +62,7 @@ end
 
 ```elixir
 # config/config.exs
-config :bugsnag, 
+config :bugsnag,
   api_key: "0123456789abcdef0123456789abcdef"
 ```
 
@@ -327,8 +332,13 @@ The following options allow adding more data to the report:
 * `os_version` — Sets the reported OS version of the error
 * `stacktrace` — Allows passing in a stack trace, e.g. from `__STACKTRACE__`
 * `metadata` - Map of arbitrary metadata to include with the report
-* `error_class` - Allows passing in the error type instead of infering from the error struct
+* `error_class` - Allows passing in the error type instead of inferring from the error struct
 
 [See the Bugsnag docs][2] for more information on these fields.
 
 [2]: https://bugsnagerrorreportingapi.docs.apiary.io/#reference/0/notify/send-error-reports
+
+## License
+
+This source code is licensed under the MIT license found in the LICENSE file.
+Copyright (C) 2014-present Jared Norman
