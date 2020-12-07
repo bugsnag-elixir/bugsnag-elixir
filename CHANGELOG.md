@@ -33,7 +33,7 @@ config :bugsnag,
 
 ### Added
 - Add `Bugsnag.HTTPClient` and default `Bugsnag.HTTPClient.Adapter.HTTPoison` adapter, configurable via `http_client` application config
-- Add option to set error class instead of infering from the exception [#108](https://github.com/bugsnag-elixir/bugsnag-elixir/pull/108)
+- Add option to set error class instead of inferring from the exception [#108](https://github.com/bugsnag-elixir/bugsnag-elixir/pull/108)
 
 ### Fixed / Maintenance
 

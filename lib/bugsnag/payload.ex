@@ -4,7 +4,7 @@ defmodule Bugsnag.Payload do
   @notifier_info %{
     name: "Bugsnag Elixir",
     version: Bugsnag.Mixfile.project()[:version],
-    url: Bugsnag.Mixfile.project()[:package][:links][:github]
+    url: Bugsnag.Mixfile.project()[:package][:links][:GitHub]
   }
 
   defstruct api_key: nil, notifier: @notifier_info, events: nil

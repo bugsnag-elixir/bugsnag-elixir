@@ -1,15 +1,19 @@
 defmodule Bugsnag.Mixfile do
   use Mix.Project
 
+  @source_url "https://github.com/bugsnag-elixir/bugsnag-elixir"
+  @version "3.0.0"
+
   def project do
     [
       app: :bugsnag,
-      version: "3.0.0",
+      version: @version,
       elixir: "~> 1.8",
       elixirc_paths: elixirc_paths(Mix.env()),
       package: package(),
       description: "An Elixir interface to the Bugsnag API.",
-      deps: deps()
+      deps: deps(),
+      docs: docs()
     ]
   end
 
@@ -18,7 +22,10 @@ defmodule Bugsnag.Mixfile do
       contributors: ["Jared Norman", "Andrew Harvey", "Alex Grant", "Coburn Berry"],
       maintainers: ["Guilherme de Maio"],
       licenses: ["MIT"],
-      links: %{github: "https://github.com/bugsnag-elixir/bugsnag-elixir"}
+      links: %{
+        Changelog: @source_url <> "/blob/master/CHANGELOG.md",
+        GitHub: @source_url
+      }
     ]
   end
 
@@ -39,6 +46,15 @@ defmodule Bugsnag.Mixfile do
       {:poison, ">= 1.5.0", optional: true},
       {:ex_doc, ">= 0.0.0", only: :dev},
       {:mox, "~> 1.0", only: :test}
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      source_ref: "v" <> @version,
+      source_url: @source_url,
+      extras: ["README.md", "CHANGELOG.md"]
     ]
   end
 end
