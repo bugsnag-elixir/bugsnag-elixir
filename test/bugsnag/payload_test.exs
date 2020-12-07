@@ -8,7 +8,7 @@ defmodule Bugsnag.PayloadTest do
       # You've been warned!
       raise "an error occurred"
     rescue
-      exception -> [exception, System.stacktrace()]
+      exception -> [exception, __STACKTRACE__]
     end
   end
 
@@ -54,7 +54,7 @@ defmodule Bugsnag.PayloadTest do
       try do
         Enum.join(3, 'million')
       rescue
-        exception -> {exception, System.stacktrace()}
+        exception -> {exception, __STACKTRACE__}
       end
 
     %{events: [%{exceptions: [%{stacktrace: stacktrace}]}]} =
@@ -88,7 +88,7 @@ defmodule Bugsnag.PayloadTest do
       try do
         Module.concat(Elixir, "Movies").watch(:thor, 3, "ragnarok\n")
       rescue
-        exception -> {exception, System.stacktrace()}
+        exception -> {exception, __STACKTRACE__}
       end
 
     %{events: [%{exceptions: [%{stacktrace: stacktrace}]}]} =
@@ -106,7 +106,7 @@ defmodule Bugsnag.PayloadTest do
       try do
         Module.concat(Elixir, "Bugsnag.Payload").non_existent_func()
       rescue
-        exception -> {exception, System.stacktrace()}
+        exception -> {exception, __STACKTRACE__}
       end
 
     %{events: [%{exceptions: [%{stacktrace: stacktrace}]}]} =
