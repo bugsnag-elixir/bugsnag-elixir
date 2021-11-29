@@ -121,6 +121,34 @@ defmodule Bugsnag.PayloadTest do
     assert ln1 == ln2
   end
 
+  test "it generates correct stacktraces for :erl_stdlib_errors" do
+    {exception, stacktrace} =
+      try do
+        :ets.select(:does_not_exist, [{{:"$1", :_}, [], [:"$1"]}])
+      rescue
+        exception -> {exception, __STACKTRACE__}
+      end
+
+    %{events: [%{exceptions: [%{stacktrace: stacktrace}]}]} =
+      Payload.new(exception, stacktrace, [])
+
+    [
+      %{
+        file: "test/bugsnag/payload_test.exs",
+        lineNumber: _,
+        inProject: false,
+        method: ":ets.select(:does_not_exist, [{{:\"$1\", :_}, [], [:\"$1\"]}])",
+        code: "%{cause: :id, module: :erl_stdlib_errors}"
+      },
+      %{
+        file: "test/bugsnag/payload_test.exs",
+        lineNumber: _,
+        method: ~s(Bugsnag.PayloadTest."test it generates correct stacktraces for :erl_stdlib_errors"/1)
+      }
+      | _
+    ] = stacktrace
+  end
+
   test "reports stack frames as not being in-project by default" do
     [
       %{file: "test/bugsnag/payload_test.exs", inProject: false} | _
