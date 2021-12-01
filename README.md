@@ -39,6 +39,7 @@ Capture exceptions and send them to the [Bugsnag](https://www.bugsnag.com/) API!
   - [Usage](#usage)
     - [Manual Reporting](#manual-reporting)
     - [Reporting Options](#reporting-options)
+  - [License](#license)
 
 <!-- /MarkdownTOC -->
 
@@ -49,7 +50,7 @@ Capture exceptions and send them to the [Bugsnag](https://www.bugsnag.com/) API!
 # mix.exs
 defp deps do
   [
-    {:bugsnag, "~> 3.0.0"},
+    {:bugsnag, "~> 3.0.1"},
     # pick ONE of these JSON encoding libraries:
     {:jason, "~> 1.0"},
     {:poison, "~> 4.0"}

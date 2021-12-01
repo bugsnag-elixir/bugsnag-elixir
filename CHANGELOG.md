@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 3.0.1
+
+### Fixed
+
+- Fix handling of stacktrace pattern for Erlang 24 [#113](https://github.com/bugsnag-elixir/bugsnag-elixir/pull/113)
+- Remove deprecated system stacktrace warnings in tests [#112](https://github.com/bugsnag-elixir/bugsnag-elixir/pull/112)
+
+### Extra 
+- Add Erlang 24 to CI [#114](https://github.com/bugsnag-elixir/bugsnag-elixir/pull/114)
+
 ## 3.0.0
 
 The most notable change in this release is the inclusion of an HTTP Client adapter and the possibility of adding your own client. By doing this, `httpoison` is now an optional dependency and must be included in the dependency list in order to use the default adapter.

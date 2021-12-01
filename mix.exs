@@ -2,7 +2,7 @@ defmodule Bugsnag.Mixfile do
   use Mix.Project
 
   @source_url "https://github.com/bugsnag-elixir/bugsnag-elixir"
-  @version "3.0.0"
+  @version "3.0.1"
 
   def project do
     [
