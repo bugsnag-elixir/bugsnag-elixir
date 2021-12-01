@@ -137,8 +137,7 @@ defmodule Bugsnag.PayloadTest do
         file: "test/bugsnag/payload_test.exs",
         lineNumber: _,
         inProject: false,
-        method: ":ets.select(:does_not_exist, [{{:\"$1\", :_}, [], [:\"$1\"]}])",
-        code: "%{cause: :id, module: :erl_stdlib_errors}"
+        method: ":ets.select(:does_not_exist, [{{:\"$1\", :_}, [], [:\"$1\"]}])"
       },
       %{
         file: "test/bugsnag/payload_test.exs",
