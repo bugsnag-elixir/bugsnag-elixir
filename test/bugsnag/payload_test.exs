@@ -143,7 +143,8 @@ defmodule Bugsnag.PayloadTest do
       %{
         file: "test/bugsnag/payload_test.exs",
         lineNumber: _,
-        method: ~s(Bugsnag.PayloadTest."test it generates correct stacktraces for :erl_stdlib_errors"/1)
+        method:
+          ~s(Bugsnag.PayloadTest."test it generates correct stacktraces for :erl_stdlib_errors"/1)
       }
       | _
     ] = stacktrace
