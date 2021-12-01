@@ -14,23 +14,30 @@ jobs:
       fail-fast: false
       matrix:
         # https://github.com/elixir-lang/elixir/releases
-        elixir: ["1.11.0", "1.10.4", "1.9.4", "1.8.2"]
+        elixir: ["1.12.3", "1.11.4", "1.10.4", "1.9.4", "1.8.2"]
         # http://erlang.org/download/otp_versions_tree.html
-        erlang: ["21.3.8", "22.3.4"]
-        ubuntu: ["focal-20200423"]
-        include:
+        erlang: ["21.3.8", "22.3.4", "23.3.4", "24.1.7"]
+        exclude:
+          - elixir: "1.8.2"
+            erlang: "23.3.4"
+          - elixir: "1.9.4"
+            erlang: "23.3.4"
+          - elixir: "1.8.2"
+            erlang: "24.1.7"
+          - elixir: "1.9.4"
+            erlang: "24.1.7"
           - elixir: "1.10.4"
-            erlang: "23.1.1"
-            ubuntu: "focal-20200703"
-          - elixir: "1.11.0"
-            erlang: "23.1.1"
-            ubuntu: "focal-20200703"
-
-    container:
-      image: hexpm/elixir:${{ matrix.elixir }}-erlang-${{ matrix.erlang }}-ubuntu-${{ matrix.ubuntu }}
+            erlang: "24.1.7"
+          - elixir: "1.12.3"
+            erlang: "21.3.8"
 
     steps:
     - uses: actions/checkout@v2
+
+    - uses: erlef/setup-beam@v1
+      with:
+        otp-version: ${{matrix.erlang}}
+        elixir-version: ${{matrix.elixir}}
 
     - name: Install dependencies
       run: |-
