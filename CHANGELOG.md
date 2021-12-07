@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 3.0.2
+
+### Added
+
+- Add support for Elixir 1.13 with changed stacktrace frame format [#115](https://github.com/bugsnag-elixir/bugsnag-elixir/pull/115)
+
+
 ## 3.0.1
 
 ### Fixed
