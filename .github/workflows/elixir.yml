@@ -30,6 +30,8 @@ jobs:
             erlang: "24.1.7"
           - elixir: "1.12.3"
             erlang: "21.3.8"
+          - elixir: "1.13.0"
+            erlang: "21.3.8"
 
     steps:
     - uses: actions/checkout@v2
