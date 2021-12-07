@@ -112,13 +112,14 @@ defmodule Bugsnag.PayloadTest do
     %{events: [%{exceptions: [%{stacktrace: stacktrace}]}]} =
       Payload.new(exception, stacktrace, [])
 
-    [
-      %{file: file1, lineNumber: ln1, method: "Bugsnag.Payload.non_existent_func()"},
-      %{file: file2, lineNumber: ln2, method: _, code: _} | _
-    ] = stacktrace
-
-    assert file1 == file2
-    assert ln1 == ln2
+    assert [
+             %{
+               file: file_name,
+               lineNumber: line_number,
+               method: "Bugsnag.Payload.non_existent_func()"
+             },
+             %{file: file_name, lineNumber: line_number, method: _, code: _code} | _
+           ] = stacktrace
   end
 
   test "it generates correct stacktraces for :erl_stdlib_errors" do
@@ -132,21 +133,21 @@ defmodule Bugsnag.PayloadTest do
     %{events: [%{exceptions: [%{stacktrace: stacktrace}]}]} =
       Payload.new(exception, stacktrace, [])
 
-    [
-      %{
-        file: "test/bugsnag/payload_test.exs",
-        lineNumber: _,
-        inProject: false,
-        method: ":ets.select(:does_not_exist, [{{:\"$1\", :_}, [], [:\"$1\"]}])"
-      },
-      %{
-        file: "test/bugsnag/payload_test.exs",
-        lineNumber: _,
-        method:
-          ~s(Bugsnag.PayloadTest."test it generates correct stacktraces for :erl_stdlib_errors"/1)
-      }
-      | _
-    ] = stacktrace
+    assert [
+             %{
+               file: "test/bugsnag/payload_test.exs",
+               lineNumber: _,
+               inProject: false,
+               method: ":ets.select(:does_not_exist, [{{:\"$1\", :_}, [], [:\"$1\"]}])"
+             },
+             %{
+               file: "test/bugsnag/payload_test.exs",
+               lineNumber: _,
+               method:
+                 ~s(Bugsnag.PayloadTest."test it generates correct stacktraces for :erl_stdlib_errors"/1)
+             }
+             | _
+           ] = stacktrace
   end
 
   test "reports stack frames as not being in-project by default" do
@@ -174,10 +175,10 @@ defmodule Bugsnag.PayloadTest do
   test "allows in-project classification by calling an anonymous function per stack frame" do
     in_project = fn {_mod, fun, _args, _file} -> fun == :get_problem end
 
-    [
-      %{method: "Bugsnag.PayloadTest.get_problem/0", inProject: true},
-      %{method: "Bugsnag.PayloadTest" <> _, inProject: false} | _
-    ] = get_exception(in_project: in_project).stacktrace
+    assert [
+             %{method: "Bugsnag.PayloadTest.get_problem/0", inProject: true},
+             %{method: "Bugsnag.PayloadTest" <> _, inProject: false} | _
+           ] = get_exception(in_project: in_project).stacktrace
   end
 
   test "allows in-project classification by calling a module function per stack frame" do
