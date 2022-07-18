@@ -11,8 +11,11 @@ if Code.ensure_loaded?(HTTPoison) do
 
     @impl true
     def post(%Request{} = request) do
+      configuration = Application.get(:bugsnag, __MODULE__, [])
+      additional_opts = Keyword.get(configuration, :additional_opts, [])
+
       request.url
-      |> HTTPoison.post(request.body, request.headers, request.opts)
+      |> HTTPoison.post(request.body, request.headers, request.opts ++ additional_opts)
       |> case do
         {:ok, %{body: body, headers: headers, status_code: status}} ->
           {:ok, Response.new(status, headers, body)}
