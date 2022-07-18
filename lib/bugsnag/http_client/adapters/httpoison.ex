@@ -11,7 +11,7 @@ if Code.ensure_loaded?(HTTPoison) do
 
     @impl true
     def post(%Request{} = request) do
-      configuration = Application.get(:bugsnag, __MODULE__, [])
+      configuration = Application.get_env(:bugsnag, __MODULE__, [])
       additional_opts = Keyword.get(configuration, :additional_opts, [])
 
       request.url
