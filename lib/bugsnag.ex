@@ -1,12 +1,17 @@
 defmodule Bugsnag do
-  use Application
+  alias Bugsnag.LoggerBackend
   require Logger
+  use Application
 
   def start(_type, _args) do
     config = load_config()
 
     if use_logger?(config) do
       :error_logger.add_report_handler(Bugsnag.Logger)
+    end
+
+    if add_backend?(config) do
+      Logger.add_backend(LoggerBackend)
     end
 
     # Update Application config with evaluated configuration
@@ -58,6 +63,7 @@ defmodule Bugsnag do
       api_key: {:system, "BUGSNAG_API_KEY", nil},
       endpoint_url: {:system, "BUGSNAG_ENDPOINT_URL", "https://notify.bugsnag.com"},
       use_logger: {:system, "BUGSNAG_USE_LOGGER", true},
+      add_backend: {:system, "BUGSNAG_ADD_BACKEND", true},
       release_stage: {:system, "BUGSNAG_RELEASE_STAGE", "production"},
       notify_release_stages: {:system, "BUGSNAG_NOTIFY_RELEASE_STAGES", ["production"]},
       hostname: {:system, "BUGSNAG_HOSTNAME", "unknown"},
@@ -82,5 +88,9 @@ defmodule Bugsnag do
 
   defp use_logger?(config) do
     not is_nil(config[:api_key]) and to_string(config[:use_logger]) == "true"
+  end
+
+  defp add_backend?(config) do
+    not is_nil(config[:api_key]) and to_string(config[:add_backend]) == "true"
   end
 end
