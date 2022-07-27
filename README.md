@@ -217,8 +217,7 @@ If a sanitizer function throws an exception while running, it will log out a war
 
 **Default:** `nil`
 
-If you want a smart default for the `in_project`, you can set the `application`
-value. Set this to the name of your application with the following:
+Sets the `application` name to generate a smart default for the `in_project` value. Set this to the name of your application with the following:
 
 ```elixir
 config :bugsnag, application: Mix.Project.config[:app]
