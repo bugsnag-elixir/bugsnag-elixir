@@ -194,6 +194,27 @@ defmodule Bugsnag.PayloadTest do
     ] = get_exception(in_project: in_project).stacktrace
   end
 
+  test "Uses :application.get_application/1 to determine project membership of modules" do
+    in_project = nil
+
+    options = [application: :bugsnag, in_project: in_project]
+
+    [exception, stacktrace] =
+      try do
+        Raiser.exception("an error occurred")
+      rescue
+        exception -> [exception, __STACKTRACE__]
+      end
+
+    %{events: [event]} = Payload.new(exception, stacktrace, options)
+
+    %{exceptions: [exception]} = event
+
+    [
+      %{file: "test/support/raiser.ex", inProject: true} | _
+    ] = exception.stacktrace
+  end
+
   test "it reports the error class" do
     assert RuntimeError == get_exception().errorClass
   end
