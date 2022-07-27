@@ -27,6 +27,7 @@ Capture exceptions and send them to the [Bugsnag](https://www.bugsnag.com/) API!
     - [`app_type`](#app_type)
     - [`app_version`](#app_version)
     - [`sanitizer`](#sanitizer)
+    - [`application`](#application)
     - [`in_project`](#in_project)
       - [String Matching](#string-matching)
       - [Regex Matching](#regex-matching)
@@ -211,6 +212,16 @@ Produces the failure message
 ```
 
 If a sanitizer function throws an exception while running, it will log out a warning and return the string `[CENSORED DUE TO SANITIZER EXCEPTION]`
+
+### `application`
+
+**Default:** `nil`
+
+Sets the `application` name to generate a smart default for the `in_project` value. Set this to the name of your application with the following:
+
+```elixir
+config :bugsnag, application: Mix.Project.config[:app]
+```
 
 ### `in_project`
 

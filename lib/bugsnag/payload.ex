@@ -162,7 +162,15 @@ defmodule Bugsnag.Payload do
         fn {_m, _f, _a, file} -> String.contains?(file, str) end
 
       _other ->
-        fn _ -> false end
+        fn {module, _f, _a, _file} ->
+          case :application.get_application(module) do
+            {:ok, application} ->
+              fetch_option(options, :application, nil) == application
+
+            :undefined ->
+              false
+          end
+        end
     end
   end
 

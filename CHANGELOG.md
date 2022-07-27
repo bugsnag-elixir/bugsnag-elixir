@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add `application` config for smarter `in_project` defaults [#119](https://github.com/bugsnag-elixir/bugsnag-elixir/pull/119)
+
 ## 3.0.2
 
 ### Added
