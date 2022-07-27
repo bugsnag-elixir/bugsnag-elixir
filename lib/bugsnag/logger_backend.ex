@@ -1,4 +1,6 @@
 defmodule Bugsnag.LoggerBackend do
+  require Logger
+
   @behaviour :gen_event
 
   @impl :gen_event
@@ -12,20 +14,25 @@ defmodule Bugsnag.LoggerBackend do
   end
 
   @impl :gen_event
-  def handle_event({_level, _group_leader, {Logger, message, timestamp, metadata}}, options) do
-    if Keyword.has_key?(metadata, :crash_reason) do
+  def handle_event({_level, _group_leader, {Logger, _message, _timestamp, metadata}}, options) do
+    try do
       case metadata[:crash_reason] do
         {{:nocatch, _term}, _stacktrace} ->
           {:ok, options}
 
         {exception, stacktrace} when is_exception(exception) ->
-          Bugsnag.report(exception, stacktrace: stacktrace)
+          Bugsnag.sync_report(exception, stacktrace: stacktrace)
 
-        {_exit, stacktrace} ->
+        {_exit_value, _stacktrace} ->
+          {:ok, options}
+
+        nil ->
           {:ok, options}
       end
-    else
-      {:ok, options}
+    rescue
+      exception ->
+        error_message = Exception.format(:error, exception)
+        Logger.warn("Unable to notify Bugsnag. #{error_message}")
     end
   end
 
