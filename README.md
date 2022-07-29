@@ -36,6 +36,7 @@ Capture exceptions and send them to the [Bugsnag](https://www.bugsnag.com/) API!
     - [`exception_filter`](#exception_filter)
     - [`json_library`](#json_library)
     - [`http_client`](#http_client)
+    - [`http_client_opts`](#http_client_opts)
   - [Usage](#usage)
     - [Manual Reporting](#manual-reporting)
     - [Reporting Options](#reporting-options)
@@ -131,6 +132,7 @@ config :bugsnag,
   endpoint_url: "https://self-hosted-bugsnag.myapp",
   hostname: {:system, "HOST", "unknown"},
   http_client: MyApp.BugsnagHTTPAdapter,
+  http_client_opts: [ssl: [cacertfile: "/path/to/cacertfile.pem"]],
   in_project: "lib/my_app_name",
   json_library: Jason,
   notify_release_stages: ["staging", "production"],
@@ -294,6 +296,13 @@ The JSON encoding library.
 **Default** `Bugsnag.HTTPClient.Adapters.HTTPoison`
 
 An adapter implementing the `Bugsnag.HTTPClient` behaviour.
+
+### `http_client_opts`
+
+**Default** `[]`
+
+A keyword list of options passed to the calls made with an adapter implementing
+the `Bugsnag.HTTPClient` behaviour.
 
 ## Usage
 
