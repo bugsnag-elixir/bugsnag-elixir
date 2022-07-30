@@ -1,9 +1,10 @@
-if function_exported?(Kernel, :is_exception, 1) do
-  defmodule Bugsnag.LoggerBackend.GuardShim do
-  end
-else
-  defmodule Bugsnag.LoggerBackend.GuardShim do
-    defmacro is_exception(term) do
+defmodule Bugsnag.LoggerBackend.GuardShim do
+  defmacro is_exception(term) do
+    if function_exported?(Kernel, :is_exception, 1) do
+      quote do
+        is_exception(unquote(term))
+      end
+    else
       quote do
         is_map_key(unquote(term), :__exception__)
       end
