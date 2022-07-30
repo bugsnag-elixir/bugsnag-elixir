@@ -15,6 +15,10 @@ defmodule BugsnagTest do
     def should_notify(_e, _s), do: raise("boom")
   end
 
+  def fake_stacktrace do
+    [{FilterCrash, :some_fun, 1, [file: "foobar", line: 1]}]
+  end
+
   setup do
     on_exit(fn ->
       Bugsnag.TaskSupervisor
@@ -29,7 +33,7 @@ defmodule BugsnagTest do
 
   test "it doesn't raise errors if you report garbage" do
     capture_log(fn ->
-      Bugsnag.report(Enum, %{ignore: :this_error_in_test})
+      Bugsnag.report(Enum, nil, %{ignore: :this_error_in_test})
     end)
   end
 
@@ -38,14 +42,14 @@ defmodule BugsnagTest do
     Application.put_env(:bugsnag, :release_stage, "production")
     on_exit(fn -> Application.put_env(:bugsnag, :release_stage, old_release_stage) end)
 
-    assert :ok = Bugsnag.sync_report(RuntimeError.exception("some_error"))
+    assert :ok = Bugsnag.sync_report(RuntimeError.exception("some_error"), fake_stacktrace())
   end
 
   test "it handles real errors" do
     try do
       raise "an exception"
     rescue
-      exception -> Bugsnag.report(exception)
+      exception -> Bugsnag.report(exception, __STACKTRACE__)
     end
   end
 
@@ -94,7 +98,8 @@ defmodule BugsnagTest do
 
     log =
       capture_log(fn ->
-        assert {:error, %{reason: "API key is not configured"}} == Bugsnag.sync_report("error!")
+        assert {:error, %{reason: "API key is not configured"}} ==
+                 Bugsnag.sync_report("error!", fake_stacktrace())
       end)
 
     assert log =~ "api_key is not configured"
@@ -106,7 +111,9 @@ defmodule BugsnagTest do
     on_exit(fn -> Application.put_env(:bugsnag, :release_stage, old_release_stage) end)
 
     refute Enum.member?(Application.get_env(:bugsnag, :notify_release_stages), "development")
-    assert {:ok, :not_sent} = Bugsnag.sync_report(RuntimeError.exception("some_error"))
+
+    assert {:ok, :not_sent} =
+             Bugsnag.sync_report(RuntimeError.exception("some_error"), fake_stacktrace())
   end
 
   test "does not notify bugsnag if filter returns false" do
@@ -121,7 +128,8 @@ defmodule BugsnagTest do
     on_exit(fn -> Application.put_env(:bugsnag, :notify_release_stages, old_notify_stages) end)
     on_exit(fn -> Application.put_env(:bugsnag, :exception_filter, nil) end)
 
-    assert {:ok, :not_sent} = Bugsnag.sync_report(RuntimeError.exception("some_error"))
+    assert {:ok, :not_sent} =
+             Bugsnag.sync_report(RuntimeError.exception("some_error"), fake_stacktrace())
   end
 
   test "notifies bugsnag if filter returns true" do
@@ -136,7 +144,7 @@ defmodule BugsnagTest do
     on_exit(fn -> Application.put_env(:bugsnag, :notify_release_stages, old_notify_stages) end)
     on_exit(fn -> Application.put_env(:bugsnag, :exception_filter, nil) end)
 
-    assert :ok = Bugsnag.sync_report(RuntimeError.exception("some_error"))
+    assert :ok = Bugsnag.sync_report(RuntimeError.exception("some_error"), fake_stacktrace())
   end
 
   test "notifies bugsnag if you use sync_report and release_stage is included in the notify_release_stages" do
@@ -150,7 +158,7 @@ defmodule BugsnagTest do
     on_exit(fn -> Application.put_env(:bugsnag, :release_stage, old_release_stage) end)
     on_exit(fn -> Application.put_env(:bugsnag, :notify_release_stages, old_notify_stages) end)
 
-    assert :ok = Bugsnag.sync_report(RuntimeError.exception("some_error"))
+    assert :ok = Bugsnag.sync_report(RuntimeError.exception("some_error"), fake_stacktrace())
   end
 
   test "notifies bugsnag if filter throws exception" do
@@ -164,6 +172,6 @@ defmodule BugsnagTest do
     on_exit(fn -> Application.put_env(:bugsnag, :release_stage, old_release_stage) end)
     on_exit(fn -> Application.put_env(:bugsnag, :notify_release_stages, old_notify_stages) end)
 
-    assert :ok = Bugsnag.sync_report(RuntimeError.exception("some_error"))
+    assert :ok = Bugsnag.sync_report(RuntimeError.exception("some_error"), fake_stacktrace())
   end
 end

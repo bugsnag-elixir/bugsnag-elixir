@@ -22,10 +22,10 @@ defmodule Bugsnag.Logger do
 
       case error_info do
         {_kind, {exception, stacktrace}, _stack} when is_list(stacktrace) ->
-          Bugsnag.report(exception, stacktrace: stacktrace)
+          Bugsnag.report(exception, stacktrace)
 
         {_kind, exception, stacktrace} ->
-          Bugsnag.report(exception, stacktrace: stacktrace)
+          Bugsnag.report(exception, stacktrace)
       end
     rescue
       ex ->

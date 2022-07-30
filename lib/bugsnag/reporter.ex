@@ -11,8 +11,9 @@ defmodule Bugsnag.Reporter do
   @doc """
   Report the exception without waiting for the result of the Bugsnag API call.
   """
-  @spec report(exception :: term(), opts :: list()) :: {:ok, pid()} | {:error, :cannot_start_task}
-  def report(exception, options \\ []) do
+  @spec report(exception :: term(), stacktrace :: Exception.stacktrace(), opts :: list()) ::
+          {:ok, pid()} | {:error, :cannot_start_task}
+  def report(exception, stacktrace, opts \\ []) do
     start_task =
       Task.Supervisor.start_child(
         Bugsnag.TaskSupervisor,
@@ -20,7 +21,8 @@ defmodule Bugsnag.Reporter do
         :sync_report,
         [
           exception,
-          add_stacktrace(options)
+          stacktrace,
+          opts
         ],
         restart: :transient
       )
@@ -31,9 +33,7 @@ defmodule Bugsnag.Reporter do
     end
   end
 
-  def sync_report(exception, options \\ []) do
-    stacktrace = options[:stacktrace] || System.stacktrace()
-
+  def sync_report(exception, stacktrace, options \\ []) do
     if should_notify(exception, stacktrace) do
       if Application.get_env(:bugsnag, :api_key) do
         exception
@@ -83,9 +83,5 @@ defmodule Bugsnag.Reporter do
         # Swallowing error in order to avoid exception loops
         true
     end
-  end
-
-  defp add_stacktrace(options) do
-    if options[:stacktrace], do: options, else: put_in(options[:stacktrace], System.stacktrace())
   end
 end

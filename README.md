@@ -329,7 +329,7 @@ Use `Bugsnag.report` to report an exception:
 try do
   raise "heck"
 rescue exception ->
-  Bugsnag.report(exception)
+  Bugsnag.report(exception, __STACKTRACE__)
 end
 ```
 
@@ -342,20 +342,20 @@ fails), use `Bugsnag.sync_report`:
 try do
   raise "heck"
 rescue exception ->
-  :ok = Bugsnag.sync_report(exception)
+  :ok = Bugsnag.sync_report(exception, __STACKTRACE__)
 end
 ```
 
 ### Reporting Options
 
-Both `report` and `sync_report` accept an optional second argument to add more
+Both `report` and `sync_report` accept an optional third argument to add more
 data to the report or override the application configuration:
 
 ```elixir
 try do
   raise "heck"
 rescue exception ->
-  Bugsnag.report(exception, severity: "warning", context: "worker")
+  Bugsnag.report(exception, __STACKTRACE__, severity: "warning", context: "worker")
 end
 ```
 
