@@ -11,10 +11,14 @@ defmodule Bugsnag.HTTPClient do
   @callback post(Request.t()) :: success() | failure()
 
   def post(request) do
-    adapter().post(request)
+    http_client().post(%{request | opts: http_client_opts() ++ request.opts})
   end
 
-  defp adapter do
+  defp http_client do
     Application.get_env(:bugsnag, :http_client, HTTPoison)
+  end
+
+  defp http_client_opts do
+    Application.get_env(:bugsnag, :http_client_opts, [])
   end
 end
