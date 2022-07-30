@@ -1,4 +1,4 @@
-defmodule Bugsnag.LoggerTest do
+defmodule Bugsnag.LoggerBackendTest do
   use ExUnit.Case
 
   alias Bugsnag.HTTPMock
@@ -6,6 +6,7 @@ defmodule Bugsnag.LoggerTest do
   alias Bugsnag.HTTPClient.Response
   import ExUnit.CaptureLog
   import Mox
+  require Logger
 
   @receive_timeout 5_000
 
@@ -28,31 +29,11 @@ defmodule Bugsnag.LoggerTest do
   end
 
   setup do
-    :error_logger.add_report_handler(Bugsnag.Logger)
+    Logger.add_backend(Bugsnag.LoggerBackend)
 
     on_exit(fn ->
-      :error_logger.delete_report_handler(Bugsnag.Logger)
+      Logger.remove_backend(Bugsnag.LoggerBackend)
     end)
-  end
-
-  test "logging a crash" do
-    parent = self()
-    ref = make_ref()
-
-    Mox.expect(HTTPMock, :post, fn %Request{body: body} ->
-      if exception?(body, "Elixir.RuntimeError", "Oh noes") do
-        send(parent, {:post, ref})
-      end
-
-      {:ok, Response.new(200, [], "body")}
-    end)
-
-    :proc_lib.spawn(fn ->
-      raise RuntimeError, "Oh noes"
-    end)
-
-    assert_receive {:post, ^ref}, @receive_timeout
-    verify!()
   end
 
   test "crashes do not cause recursive logging" do
@@ -67,33 +48,13 @@ defmodule Bugsnag.LoggerTest do
       {:ok, Response.new(500, [], "body")}
     end)
 
-    error_report = [[error_info: {:error, %RuntimeError{message: "Oops"}, []}], []]
-    :error_logger.error_report(error_report)
+    Logger.error("Oops", crash_reason: {%RuntimeError{message: "Oops"}, []})
 
     assert_receive {:post, ^ref}, @receive_timeout
     verify!()
   end
 
-  test "log levels lower than :error_report are ignored" do
-    parent = self()
-    ref = make_ref()
-
-    Mox.expect(HTTPMock, :post, 0, fn _request ->
-      send(parent, {:post, ref})
-      {:error, :just_no}
-    end)
-
-    message_types = [:info_msg, :info_report, :warning_msg, :error_msg]
-
-    Enum.each(message_types, fn type ->
-      apply(:error_logger, type, ["Ignore me"])
-    end)
-
-    refute_receive {:post, ^ref}, @receive_timeout
-    verify!()
-  end
-
-  test "logging exceptions from special processes" do
+  test "logging exceptions from Tasks" do
     parent = self()
     ref = make_ref()
 
@@ -107,26 +68,6 @@ defmodule Bugsnag.LoggerTest do
 
         true ->
           nil
-      end
-
-      {:ok, Response.new(200, [], "body")}
-    end)
-
-    :proc_lib.spawn(fn ->
-      Float.parse("12.345e308")
-    end)
-
-    assert_receive {:post, ^ref}, @receive_timeout
-    verify!()
-  end
-
-  test "logging exceptions from Tasks" do
-    parent = self()
-    ref = make_ref()
-
-    Mox.expect(HTTPMock, :post, fn %Request{body: body} ->
-      if exception?(body, "Elixir.ArgumentError", "argument error") do
-        send(parent, {:post, ref})
       end
 
       {:ok, Response.new(200, [], "body")}
@@ -160,11 +101,11 @@ defmodule Bugsnag.LoggerTest do
   end
 
   test "warns if error report format is invalid" do
-    event = {:error_report, :gl, {:pid, :type, [[error_info: :invalid]]}}
+    event = {:error, self(), {Logger, "", nil, [crash_reason: {:a, :triple, :tuple}]}}
 
     log_msg =
       capture_log(fn ->
-        Bugsnag.Logger.handle_event(event, :state)
+        Bugsnag.LoggerBackend.handle_event(event, :state)
       end)
 
     assert log_msg =~ "Unable to notify Bugsnag. ** (CaseClauseError)"
