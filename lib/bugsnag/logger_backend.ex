@@ -15,6 +15,7 @@ end
 defmodule Bugsnag.LoggerBackend do
   require Logger
 
+  import Kernel, except: [is_exception: 1]
   import Bugsnag.LoggerBackend.GuardShim
 
   @behaviour :gen_event
