@@ -65,6 +65,9 @@ defmodule Bugsnag.LoggerBackendTest do
 
         exception?(body, "Elixir.ArgumentError", "not a textual representation of a float") ->
           send(parent, {:post, ref})
+
+        true ->
+          nil
       end
 
       {:ok, Response.new(200, [], "body")}
