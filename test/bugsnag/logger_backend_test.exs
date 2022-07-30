@@ -59,8 +59,12 @@ defmodule Bugsnag.LoggerBackendTest do
     ref = make_ref()
 
     Mox.expect(HTTPMock, :post, fn %Request{body: body} ->
-      if exception?(body, "Elixir.ArgumentError", "not a textual representation of a float") do
-        send(parent, {:post, ref})
+      cond do
+        exception?(body, "Elixir.ArgumentError", "argument error") ->
+          send(parent, {:post, ref})
+
+        exception?(body, "Elixir.ArgumentError", "not a textual representation of a float") ->
+          send(parent, {:post, ref})
       end
 
       {:ok, Response.new(200, [], "body")}

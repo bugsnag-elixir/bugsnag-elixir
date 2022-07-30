@@ -1,5 +1,20 @@
+if function_exported?(Kernel, :is_exception, 1) do
+  defmodule Bugsnag.LoggerBackend.GuardShim do
+  end
+else
+  defmodule Bugsnag.LoggerBackend.GuardShim do
+    defmacro is_exception(term) do
+      quote do
+        is_map_key(unquote(term), :__exception__)
+      end
+    end
+  end
+end
+
 defmodule Bugsnag.LoggerBackend do
   require Logger
+
+  import Bugsnag.LoggerBackend.GuardShim
 
   @behaviour :gen_event
 
@@ -22,6 +37,7 @@ defmodule Bugsnag.LoggerBackend do
 
         {exception, stacktrace} when is_exception(exception) ->
           Bugsnag.sync_report(exception, stacktrace: stacktrace)
+          {:ok, options}
 
         {_exit_value, _stacktrace} ->
           {:ok, options}
